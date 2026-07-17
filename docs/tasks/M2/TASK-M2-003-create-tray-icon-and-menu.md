@@ -1,7 +1,7 @@
 # TASK-M2-003 — Create Tray Icon and Menu
 
 **Milestone:** [M2 — Desktop Shell](../../milestones/M2-desktop-shell.md)  
-**Status:** BACKLOG  
+**Status:** DONE  
 **Priority:** P2  
 **Last updated:** 2026-07-16
 
