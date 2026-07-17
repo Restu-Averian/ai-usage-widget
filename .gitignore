@@ -1,0 +1,41 @@
+# IDEs and OS
+.DS_Store
+.idea/
+.vscode/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Rust/Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Local Databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Private Data and Raw Captures
+.private/
+*.raw.log
+*.capture.txt
+*.capture.json
+
+# Keep Lockfiles Trackable (explicitly NOT ignoring them)
+!pnpm-lock.yaml
+!Cargo.lock

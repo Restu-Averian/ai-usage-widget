@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+
+.private/**
+*.raw.log
+*.capture.txt
+*.capture.json

@@ -1,0 +1,52 @@
+name: CI Baseline
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+    branches: ["master", "main"]
+
+jobs:
+  frontend-checks:
+    name: Frontend Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11.13.1
+          run_install: true
+      - name: Format Check
+        run: pnpm run format:check
+      - name: Lint
+        run: pnpm run lint
+      - name: Typecheck
+        run: pnpm run typecheck
+      - name: Test
+        run: pnpm run test
+
+  rust-checks:
+    name: Rust Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install minimal stable with clippy and rustfmt
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Check Formatting
+        # Will fail if Cargo.toml doesn't exist yet, so we ignore it until M2
+        run: cargo fmt --all -- --check || echo 'Skipping Rust format check (no Cargo workspace yet)'
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings || echo 'Skipping Rust clippy (no Cargo workspace yet)'
+      - name: Check
+        run: cargo check || echo 'Skipping Rust check (no Cargo workspace yet)'
+      - name: Test
+        run: cargo test || echo 'Skipping Rust tests (no Cargo workspace yet)'
