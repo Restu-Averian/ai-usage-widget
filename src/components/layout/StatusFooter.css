@@ -1,0 +1,41 @@
+.status-footer {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  background-color: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.footer-text {
+  color: var(--color-text-secondary);
+}
+
+.status-indicator-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+}
+
+.status-indicator-online {
+  background-color: var(--color-success);
+}
+
+.status-indicator-offline {
+  background-color: var(--color-offline);
+}
+
+.status-indicator-loading {
+  background-color: var(--color-text-tertiary);
+}
+
+.status-indicator-error {
+  background-color: var(--color-critical);
+}

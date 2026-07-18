@@ -77,15 +77,19 @@ Format:
 Done bre.
 
 Changed:
+
 - ...
 
 Files:
+
 - ...
 
 Verify:
+
 - ...
 
 Note:
+
 - ...
 
 Keep it short. Include Note only if needed.

@@ -104,15 +104,19 @@ Format:
 Done bre.
 
 Changed:
+
 - ...
 
 Files:
+
 - [file-name.jsx](src/path/file-name.jsx)
 
 Verify:
+
 - ...
 
 Note:
+
 - ...
 
 Keep it short. Include Note only if needed.

@@ -39,3 +39,5 @@ src-tauri/gen/
 # Keep Lockfiles Trackable (explicitly NOT ignoring them)
 !pnpm-lock.yaml
 !Cargo.lock
+
+.agents

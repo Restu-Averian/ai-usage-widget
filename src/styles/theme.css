@@ -1,0 +1,232 @@
+/* src/styles/theme.css */
+
+:root {
+  /* Color Tokens - Light Theme (Default) */
+  --color-bg-canvas: #f4f5f7;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-subtle: #f7f8fa;
+  --color-bg-hover: #f0f2f5;
+  --color-bg-pressed: #e8ebef;
+
+  --color-text-primary: #16181d;
+  --color-text-secondary: #5d6470;
+  --color-text-tertiary: #858c97;
+  --color-text-inverse: #ffffff;
+
+  --color-border-subtle: #e5e8ec;
+  --color-border-strong: #cdd2d9;
+  --color-focus-ring: #4d73ff;
+
+  --color-accent: #4d73ff;
+  --color-accent-hover: #3f63e6;
+  --color-accent-subtle: #edf1ff;
+
+  --color-success: #1d8a5b;
+  --color-success-subtle: #e8f7f0;
+
+  --color-warning: #a96612;
+  --color-warning-subtle: #fff4de;
+
+  --color-critical: #c44545;
+  --color-critical-subtle: #fdecec;
+
+  --color-offline: #667085;
+  --color-offline-subtle: #eef0f3;
+
+  --color-chart-track: #e7eaf0;
+  --color-chart-line: #4d73ff;
+  --color-chart-area: rgba(77, 115, 255, 0.12);
+
+  /* Typography variables */
+  --font-sans:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
+    sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", "Cascadia Code", "Roboto Mono",
+    monospace;
+
+  /* Type scale */
+  --text-display-sm-size: 28px;
+  --text-display-sm-height: 34px;
+  --text-display-sm-weight: 650;
+
+  --text-heading-lg-size: 20px;
+  --text-heading-lg-height: 26px;
+  --text-heading-lg-weight: 650;
+
+  --text-heading-md-size: 16px;
+  --text-heading-md-height: 22px;
+  --text-heading-md-weight: 650;
+
+  --text-body-md-size: 14px;
+  --text-body-md-height: 20px;
+  --text-body-md-weight: 450;
+
+  --text-body-sm-size: 13px;
+  --text-body-sm-height: 18px;
+  --text-body-sm-weight: 450;
+
+  --text-label-md-size: 13px;
+  --text-label-md-height: 18px;
+  --text-label-md-weight: 600;
+
+  --text-label-sm-size: 12px;
+  --text-label-sm-height: 16px;
+  --text-label-sm-weight: 600;
+
+  --text-caption-size: 11px;
+  --text-caption-height: 15px;
+  --text-caption-weight: 500;
+
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Elevation */
+  --shadow-level-1: 0 1px 2px rgba(0, 0, 0, 0.05); /* Subtle border shadow placeholder */
+  --shadow-level-2:
+    0 18px 50px rgba(0, 0, 0, 0.24), 0 4px 12px rgba(0, 0, 0, 0.12); /* Popup shadow */
+
+  /* Motion */
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 250ms;
+  --motion-duration-slow: 350ms;
+  --motion-easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Explicit Light Theme (when data-theme is set manually) */
+[data-theme="light"] {
+  --color-bg-canvas: #f4f5f7;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-subtle: #f7f8fa;
+  --color-bg-hover: #f0f2f5;
+  --color-bg-pressed: #e8ebef;
+  --color-text-primary: #16181d;
+  --color-text-secondary: #5d6470;
+  --color-text-tertiary: #858c97;
+  --color-text-inverse: #ffffff;
+  --color-border-subtle: #e5e8ec;
+  --color-border-strong: #cdd2d9;
+  --color-focus-ring: #4d73ff;
+  --color-accent: #4d73ff;
+  --color-accent-hover: #3f63e6;
+  --color-accent-subtle: #edf1ff;
+  --color-success: #1d8a5b;
+  --color-success-subtle: #e8f7f0;
+  --color-warning: #a96612;
+  --color-warning-subtle: #fff4de;
+  --color-critical: #c44545;
+  --color-critical-subtle: #fdecec;
+  --color-offline: #667085;
+  --color-offline-subtle: #eef0f3;
+  --color-chart-track: #e7eaf0;
+  --color-chart-line: #4d73ff;
+  --color-chart-area: rgba(77, 115, 255, 0.12);
+}
+
+/* System Dark Theme (Implicit) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg-canvas: #111318;
+    --color-bg-surface: #181b21;
+    --color-bg-elevated: #1e222a;
+    --color-bg-subtle: #20242c;
+    --color-bg-hover: #282d36;
+    --color-bg-pressed: #303640;
+
+    --color-text-primary: #f3f5f7;
+    --color-text-secondary: #aeb5c0;
+    --color-text-tertiary: #7e8794;
+    --color-text-inverse: #111318;
+
+    --color-border-subtle: #2a3039;
+    --color-border-strong: #3a424e;
+    --color-focus-ring: #7d99ff;
+
+    --color-accent: #7d99ff;
+    --color-accent-hover: #94aaff;
+    --color-accent-subtle: #222c4b;
+
+    --color-success: #58c995;
+    --color-success-subtle: #17372a;
+
+    --color-warning: #e2a64a;
+    --color-warning-subtle: #3a2b15;
+
+    --color-critical: #f07a7a;
+    --color-critical-subtle: #402121;
+
+    --color-offline: #98a2b3;
+    --color-offline-subtle: #292e36;
+
+    --color-chart-track: #2b313a;
+    --color-chart-line: #7d99ff;
+    --color-chart-area: rgba(125, 153, 255, 0.14);
+  }
+}
+
+/* Explicit Dark Theme */
+[data-theme="dark"] {
+  --color-bg-canvas: #111318;
+  --color-bg-surface: #181b21;
+  --color-bg-elevated: #1e222a;
+  --color-bg-subtle: #20242c;
+  --color-bg-hover: #282d36;
+  --color-bg-pressed: #303640;
+
+  --color-text-primary: #f3f5f7;
+  --color-text-secondary: #aeb5c0;
+  --color-text-tertiary: #7e8794;
+  --color-text-inverse: #111318;
+
+  --color-border-subtle: #2a3039;
+  --color-border-strong: #3a424e;
+  --color-focus-ring: #7d99ff;
+
+  --color-accent: #7d99ff;
+  --color-accent-hover: #94aaff;
+  --color-accent-subtle: #222c4b;
+
+  --color-success: #58c995;
+  --color-success-subtle: #17372a;
+
+  --color-warning: #e2a64a;
+  --color-warning-subtle: #3a2b15;
+
+  --color-critical: #f07a7a;
+  --color-critical-subtle: #402121;
+
+  --color-offline: #98a2b3;
+  --color-offline-subtle: #292e36;
+
+  --color-chart-track: #2b313a;
+  --color-chart-line: #7d99ff;
+  --color-chart-area: rgba(125, 153, 255, 0.14);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

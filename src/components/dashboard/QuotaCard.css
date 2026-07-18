@@ -1,0 +1,42 @@
+.quota-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.quota-card-warning {
+  border-color: var(--color-warning);
+}
+
+.quota-card-critical {
+  border-color: var(--color-critical);
+}
+
+.quota-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+}
+
+.quota-progress-track {
+  height: 8px;
+  background-color: var(--color-chart-track);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.quota-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width var(--motion-duration-normal) var(--motion-easing-default);
+}
+
+.quota-card-footer {
+  color: var(--color-text-secondary);
+}

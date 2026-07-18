@@ -1,0 +1,29 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  overflow: hidden; /* Prevent scrolling on the whole app, allow scrolling only inside content areas */
+}
+
+/* Base dimensions per spec */
+:root {
+  --app-width: 392px;
+  --app-height: 600px;
+}
+
+@media (min-width: 360px) {
+  .app-container {
+    max-width: 440px; /* Constraints inside a native window if needed */
+  }
+}
+
+.compact-mode.app-container {
+  /* This mocks the compact mode view */
+  /* For Tauri, we might actually resize the window using the Rust backend,
+     but for the mock UI, we can just apply a CSS class if we want to visually test it inside dev server */
+  max-width: 360px;
+  max-height: 520px;
+}

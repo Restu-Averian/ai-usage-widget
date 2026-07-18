@@ -3,6 +3,7 @@ description: Restu FE fix workflow using restu-fe-fix, caveman, and diagnose
 ---
 
 Use these skills if available:
+
 - restu-fe-fix
 - caveman
 - diagnose
@@ -14,6 +15,7 @@ case: current issue
 expected: target behavior
 
 Rules:
+
 - Use restu-fe-fix as the main workflow.
 - Use caveman style for concise output.
 - Use diagnose behavior for root-cause-first debugging.
