@@ -1,4 +1,4 @@
-import { UsageWindow } from "../../lib/mock/mock-data";
+import { UsageWindow } from "../../ipc/types";
 import {
   formatReset,
   getUsagePercentDisplay,

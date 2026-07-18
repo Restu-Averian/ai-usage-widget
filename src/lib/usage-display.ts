@@ -1,4 +1,4 @@
-import { UsageWindow } from "./mock/mock-data";
+import { UsageWindow } from "../ipc/types";
 
 export type UsageTone = "normal" | "warning" | "critical" | "unknown";
 
@@ -60,7 +60,7 @@ export function getUsagePercentDisplay(
   };
 }
 
-export function formatReset(resetAt: string | undefined): string {
+export function formatReset(resetAt: string | null | undefined): string {
   if (!resetAt) {
     return "Reset time unavailable";
   }

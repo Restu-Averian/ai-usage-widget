@@ -1,4 +1,4 @@
-import { ProviderUsage } from "../../lib/mock/mock-data";
+import { ProviderUsage } from "../../ipc/types";
 import {
   formatReset,
   getUsagePercentDisplay,

@@ -1,8 +1,13 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+pub mod app_state;
+pub mod commands;
+pub mod database;
+pub mod domain;
+pub mod events;
+pub mod http;
+pub mod process;
+pub mod providers;
+pub mod scheduler;
+pub mod secrets;
 
 use tauri::{
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
@@ -51,6 +56,12 @@ fn set_autostart_state(app: tauri::AppHandle, enable: bool) -> Result<(), String
     }
 }
 
+fn shutdown_scheduler(app: &tauri::AppHandle) {
+    if let Some(state) = app.try_state::<app_state::AppState>() {
+        tauri::async_runtime::block_on(state.scheduler.shutdown());
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -71,16 +82,34 @@ pub fn run() {
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            greet,
             set_auto_hide_guard,
             hide_window,
             set_tray_title,
             get_autostart_state,
-            set_autostart_state
+            set_autostart_state,
+            commands::get_app_bootstrap,
+            commands::list_providers,
+            commands::get_provider_state,
+            commands::refresh_provider,
+            commands::refresh_all_providers,
+            commands::get_settings,
+            commands::update_settings,
+            commands::get_usage_history,
+            commands::save_provider_api_key,
+            commands::delete_provider_api_key,
+            commands::set_fake_provider_scenario
         ])
         .setup(|app| {
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+            let app_data_dir = app.path().app_data_dir()?;
+            std::fs::create_dir_all(&app_data_dir)?;
+            let state = tauri::async_runtime::block_on(app_state::AppState::production(
+                app_data_dir.join("ai-usage-dock.sqlite3"),
+                app.handle().clone(),
+            ))?;
+            app.manage(state);
+
             let toggle_i =
                 MenuItem::with_id(app, "toggle", "Open AI Usage Dock", true, None::<&str>)?;
             app.manage(ToggleMenuItem(toggle_i.clone()));
@@ -138,6 +167,7 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(move |app, event| {
                     if event.id.as_ref() == "quit" {
+                        shutdown_scheduler(app);
                         app.exit(0);
                     } else if event.id.as_ref() == "toggle" {
                         if let Some(window) = app.get_webview_window("usage-popup") {

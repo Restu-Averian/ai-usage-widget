@@ -1,9 +1,12 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useUiStore } from "../../stores/uiStore";
 import { RefreshCw, Settings, ChevronLeft } from "lucide-react";
 import "./AppHeader.css";
 
 export function AppHeader() {
-  const { viewState, setViewState } = useUiStore();
+  const queryClient = useQueryClient();
+  const { viewState, selectedProvider, mockScenarios, setViewState } =
+    useUiStore();
 
   if (viewState === "settings") {
     return (
@@ -28,7 +31,19 @@ export function AppHeader() {
         <span className="text-heading-md header-title">AI Usage Dock</span>
       </div>
       <div className="header-actions">
-        <button className="icon-button" aria-label="Refresh">
+        <button
+          className="icon-button"
+          aria-label="Refresh"
+          onClick={() =>
+            queryClient.invalidateQueries({
+              queryKey: [
+                "providerUsage",
+                selectedProvider,
+                mockScenarios[selectedProvider],
+              ],
+            })
+          }
+        >
           <RefreshCw size={18} />
         </button>
         <button

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ProviderId } from "../lib/mock/mock-data";
+import { ProviderId } from "../ipc/types";
 import {
   DEFAULT_MOCK_SCENARIOS,
   MockProviderScenario,

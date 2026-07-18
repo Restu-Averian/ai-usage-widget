@@ -1,7 +1,7 @@
 # TASK-M4-005 — Implement HTTP Transport
 
 **Milestone:** [M4 — Core Application Layer](../../milestones/M4-core-application-layer.md)  
-**Status:** BACKLOG  
+**Status:** DONE
 **Priority:** P2  
 **Last updated:** 2026-07-16
 

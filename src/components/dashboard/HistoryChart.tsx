@@ -1,8 +1,16 @@
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
-import { sevenDayHistory } from "../../lib/mock/mock-data";
+import { useUiStore } from "../../stores/uiStore";
+import { useUsageHistory } from "../../stores/queries";
 import "./HistoryChart.css";
 
 export function HistoryChart() {
+  const { selectedProvider } = useUiStore();
+  const { data = [] } = useUsageHistory(selectedProvider);
+  const chartData = data.map((point) => ({
+    timestamp: point.timestamp,
+    value: point.value,
+  }));
+
   return (
     <div className="history-chart-container">
       <div className="history-chart-header">
@@ -11,7 +19,7 @@ export function HistoryChart() {
       <div className="chart-wrapper">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={sevenDayHistory}
+            data={chartData}
             margin={{ top: 5, right: 0, left: 0, bottom: 0 }}
           >
             <defs>

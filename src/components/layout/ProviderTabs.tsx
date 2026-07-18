@@ -1,5 +1,5 @@
 import { useUiStore } from "../../stores/uiStore";
-import { ProviderId } from "../../lib/mock/mock-data";
+import { ProviderId } from "../../ipc/types";
 import "./ProviderTabs.css";
 
 const PROVIDERS: { id: ProviderId; label: string }[] = [

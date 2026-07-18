@@ -1,7 +1,7 @@
 # TASK-M4-004 — Implement Process Runner
 
 **Milestone:** [M4 — Core Application Layer](../../milestones/M4-core-application-layer.md)  
-**Status:** BACKLOG  
+**Status:** DONE
 **Priority:** P2  
 **Last updated:** 2026-07-16
 

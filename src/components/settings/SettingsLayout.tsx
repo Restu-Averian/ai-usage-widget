@@ -3,7 +3,7 @@ import {
   MockProviderScenario,
   MOCK_SCENARIO_OPTIONS,
 } from "../../lib/mock/mock-adapter";
-import { ProviderId } from "../../lib/mock/mock-data";
+import { ProviderId } from "../../ipc/types";
 import { useThemePreference } from "../../lib/theme";
 import "./SettingsLayout.css";
 
