@@ -1,21 +1,20 @@
-# M7 Tasks — Third Provider or Safe Fallback
+# M7 Tasks — Release Hardening
 
-**Milestone:** [../../milestones/M7-third-provider-or-fallback.md](../../milestones/M7-third-provider-or-fallback.md)  
-**Task count:** 7
+**Last updated:** 2026-07-19
 
-## Recommended Order
+Milestone: [`M7 — Release Hardening`](../../milestones/M7-release-hardening.md)
 
-- [M7-001 — Revalidate Third Provider Feasibility](TASK-M7-001-revalidate-third-provider-feasibility.md)
-- [M7-002 — Implement Third Provider Detection](TASK-M7-002-implement-third-provider-detection.md)
-- [M7-003 — Implement Third Provider Automatic Path](TASK-M7-003-implement-third-provider-automatic-path.md)
-- [M7-004 — Implement Dashboard Fallback Path](TASK-M7-004-implement-dashboard-fallback-path.md)
-- [M7-005 — Complete Provider Capability Matrix](TASK-M7-005-complete-provider-capability-matrix.md)
-- [M7-006 — Run Three-Provider Regression](TASK-M7-006-run-three-provider-regression.md)
-- [M7-007 — Review Initial Provider Coverage](TASK-M7-007-review-initial-provider-coverage.md)
+## Task Order
 
-## Execution Notes
-
-- Execute in order unless dependency review explicitly allows parallel work.
-- Keep one task `IN_PROGRESS` per coding agent.
-- Follow root `AGENTS.md`.
-- Refine future tasks when earlier findings change the implementation plan.
+1. [Finalize App Identity](TASK-M7-001-finalize-app-identity.md) — `BACKLOG`
+2. [Validate macOS Menu Bar Package](TASK-M7-002-validate-macos-menu-bar-package.md) — `BACKLOG`
+3. [Configure macOS Signing and Notarization](TASK-M7-003-configure-macos-signing-and-notarization.md) — `BACKLOG`
+4. [Validate Windows Tray Installer](TASK-M7-004-validate-windows-tray-installer.md) — `BACKLOG`
+5. [Configure Windows Signing](TASK-M7-005-configure-windows-signing.md) — `BACKLOG`
+6. [Implement Launch at Login](TASK-M7-006-implement-launch-at-login.md) — `BACKLOG`
+7. [Harden Graceful Shutdown](TASK-M7-007-harden-graceful-shutdown.md) — `BACKLOG`
+8. [Validate Migrations and Recovery](TASK-M7-008-validate-migrations-and-recovery.md) — `BACKLOG`
+9. [Implement Redacted Logging and Diagnostics](TASK-M7-009-implement-redacted-logging-and-diagnostics.md) — `BACKLOG`
+10. [Harden Wake and Network Recovery](TASK-M7-010-harden-wake-and-network-recovery.md) — `BACKLOG`
+11. [Run Platform Behavior Matrix](TASK-M7-011-run-platform-behavior-matrix.md) — `BACKLOG`
+12. [Complete Release Checklist](TASK-M7-012-complete-release-checklist.md) — `BACKLOG`

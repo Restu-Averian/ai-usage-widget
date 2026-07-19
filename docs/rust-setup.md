@@ -1,28 +1,24 @@
-# Rust Tooling and Prerequisites
+# Rust Setup — AI Usage Dock
 
-## Toolchain
+**Last updated:** 2026-07-19
 
-This repository uses the `stable` Rust toolchain as defined in `rust-toolchain.toml`.
+Required baseline:
 
-## Platform Prerequisites
+```text
+Rust stable
+rustfmt
+clippy
+Tauri 2 prerequisites for macOS and Windows
+```
 
-To compile the Tauri application, you must install the platform-specific dependencies:
+Verification:
 
-### macOS
+```bash
+rustc --version
+cargo --version
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test
+```
 
-1. Install Xcode Command Line Tools: `xcode-select --install`
-2. Install Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-
-### Windows
-
-1. Install Visual Studio C++ Build Tools.
-2. Install Rust: Download `rustup-init.exe` from the official website.
-
-## Commands
-
-The following scripts are configured for checking Rust quality (accessible via `pnpm`):
-
-- `pnpm rs:fmt` - Formats all Rust code
-- `pnpm rs:check` - Checks for compilation errors
-- `pnpm rs:clippy` - Runs the clippy linter
-- `pnpm rs:test` - Runs all Rust unit tests
+Rust owns tray lifecycle, provider execution, SQLite, native credential storage, scheduling, logging, and graceful shutdown. Frontend access must remain behind narrow typed Tauri commands.

@@ -1,22 +1,16 @@
-# M6 Tasks — Second Provider Integration
+# M6 Tasks — Antigravity Provider Integration
 
-**Milestone:** [../../milestones/M6-second-provider-integration.md](../../milestones/M6-second-provider-integration.md)  
-**Task count:** 8
+**Last updated:** 2026-07-19
 
-## Recommended Order
+Milestone: [`M6 — Antigravity Provider Integration`](../../milestones/M6-antigravity-provider-integration.md)
 
-- [M6-001 — Confirm Second Provider Strategy](TASK-M6-001-confirm-second-provider-strategy.md)
-- [M6-002 — Implement Second Provider Detection](TASK-M6-002-implement-second-provider-detection.md)
-- [M6-003 — Implement Second Provider Authentication](TASK-M6-003-implement-second-provider-auth.md)
-- [M6-004 — Implement Second Provider Fetch and Parser](TASK-M6-004-implement-second-provider-fetch-parser.md)
-- [M6-005 — Integrate Second Provider UI and Data](TASK-M6-005-integrate-second-provider-ui-data.md)
-- [M6-006 — Implement Refresh All Concurrency](TASK-M6-006-implement-refresh-all-concurrency.md)
-- [M6-007 — Add Cross-Provider Regression Tests](TASK-M6-007-add-cross-provider-regression-tests.md)
-- [M6-008 — Review Second Provider Integration](TASK-M6-008-review-second-provider-integration.md)
+## Task Order
 
-## Execution Notes
-
-- Execute in order unless dependency review explicitly allows parallel work.
-- Keep one task `IN_PROGRESS` per coding agent.
-- Follow root `AGENTS.md`.
-- Refine future tasks when earlier findings change the implementation plan.
+1. [Confirm Antigravity Strategy](TASK-M6-001-confirm-antigravity-strategy.md) — `BLOCKED`
+2. [Implement Antigravity Detection](TASK-M6-002-implement-antigravity-detection.md) — `BLOCKED`
+3. [Implement Antigravity Connection](TASK-M6-003-implement-antigravity-connection.md) — `BLOCKED`
+4. [Implement Antigravity Fetch and Parser](TASK-M6-004-implement-antigravity-fetch-and-parser.md) — `BLOCKED`
+5. [Integrate Antigravity Snapshot](TASK-M6-005-integrate-antigravity-snapshot.md) — `BLOCKED`
+6. [Integrate Antigravity Popup and Tray](TASK-M6-006-integrate-antigravity-popup-and-tray.md) — `BLOCKED`
+7. [Add Cross-Provider Isolation Tests](TASK-M6-007-add-cross-provider-isolation-tests.md) — `BLOCKED`
+8. [Run M6 PASS Review](TASK-M6-008-run-m6-pass-review.md) — `BLOCKED`

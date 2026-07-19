@@ -1,38 +1,44 @@
-# TASK-Mx-000 — Task Title
+# TASK-Mx-000 — Task Name
 
-**Milestone:** [Mx — Milestone](../../milestones/Mx-milestone.md)  
+**Milestone:** `../../milestones/<milestone-file>.md`  
 **Status:** BACKLOG  
 **Priority:** P2  
-**Last updated:** 2026-07-16
+**Last updated:** YYYY-MM-DD
 
 ## Objective
 
-One primary outcome.
+One independently reviewable outcome.
 
 ## Dependencies
 
-- ...
+- Explicit dependency.
 
 ## In Scope
 
-- ...
+- Required work.
 
 ## Out of Scope
 
-- ...
+- Unrelated work.
 
 ## Acceptance Criteria
 
-- [ ] ...
+- [ ] Observable result.
+- [ ] Relevant checks pass.
+- [ ] Security boundaries remain intact.
 
 ## Verification
 
-- ...
+Record commands and manual checks.
 
 ## Completion Report
 
-- files changed;
-- commands run;
-- tests passed or failed;
-- security considerations;
-- next task.
+```text
+files changed
+implementation summary
+commands run
+results
+acceptance status
+known limitations
+next task
+```

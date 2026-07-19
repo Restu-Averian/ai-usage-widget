@@ -1,184 +1,37 @@
 # M4 — Core Application Layer
 
 **Project:** AI Usage Dock  
-**Document status:** Draft v0.1  
-**Last updated:** 2026-07-16
+**Status:** PASS — persistence scope corrected  
+**Last updated:** 2026-07-19
 
-Related documents:
+## Objective
 
-- `../AI-Usage-Dock-PRD.md`
-- `../AI-Usage-Dock-Technical-Spike.md`
-- `../AI-Usage-Dock-Technical-Design.md`
-- `../ui-specification/README.md`
-- `../../AGENTS.md`
+Provide typed IPC, Rust domain contracts, provider registry, process/HTTP boundaries, SQLite repositories, native secrets, events, and refresh coordination. Final persistence stores latest state only.
 
----
+## Dependencies
 
-## 1. Objective
+M1–M3
 
-Build the reusable Rust and IPC infrastructure shared by every provider integration.
+## Deliverables
 
-## 2. Intended Outcome
+- typed commands.
+- two-provider registry.
+- latest-snapshot repository.
+- refresh metadata.
+- secret-store boundary.
 
-A fake provider can complete the full production-shaped path:
+## Scope Boundaries
 
-```text
-refresh request
-→ provider registry
-→ normalized usage
-→ SQLite snapshot
-→ backend event
-→ frontend query invalidation
-→ updated UI
-```
+- Preserve the security and architecture boundaries in `../../AGENTS.md`.
+- Do not add removed provider, chart, appearance, API dashboard, or mobile scope.
+- Unknown usage must never become zero.
 
-## 3. Dependencies
+## Acceptance Criteria
 
-- M1 repository foundation.
-- M2 desktop lifecycle.
-- M3 normalized mock contracts.
-- Technical Design.
-- M0 results for PTY decisions, if PTY is considered.
+- [x] Frontend has no direct system/data access.
+- [x] Registry is limited to active providers.
+- [x] Persistence is latest-state only.
 
-## 4. In Scope
+## Task Files
 
-- Rust domain types.
-- Typed application errors.
-- Provider capability model.
-- Provider registry.
-- Fake provider connector.
-- Process-runner abstraction.
-- Optional HTTP transport abstraction.
-- Typed Tauri commands.
-- Frontend IPC wrapper.
-- Zod validation.
-- SQLx SQLite.
-- Migrations.
-- Connection repository.
-- Snapshot repository.
-- Notification-state repository boundary.
-- Settings service.
-- Native secret-store abstraction.
-- Refresh scheduler.
-- Per-provider single-flight.
-- Retry backoff.
-- wake/network event boundaries.
-- Redacted logging.
-- Backend events.
-
-## 5. Out of Scope
-
-- Production provider parser.
-- Production PTY implementation unless explicitly approved.
-- Real API usage connector.
-- Release signing.
-- Cloud sync.
-
-## 6. Suggested Task Groups
-
-### M4-A — Domain contracts
-
-- Provider ID.
-- Connection type.
-- Reliability.
-- Usage periods.
-- Usage windows.
-- Provider usage.
-- Application errors.
-
-### M4-B — IPC
-
-- Bootstrap command.
-- List providers.
-- Get provider state.
-- Refresh provider.
-- Refresh all.
-- Settings commands.
-- History commands.
-- Runtime frontend schemas.
-
-### M4-C — Persistence
-
-- SQLite initialization.
-- Migrations.
-- connection repository.
-- snapshot/window repository.
-- history query.
-- retention boundary.
-
-### M4-D — Security infrastructure
-
-- Native secret-store interface.
-- save/exists/delete behavior.
-- redaction.
-- no secret-read IPC.
-- Tauri capability review.
-
-### M4-E — Refresh orchestration
-
-- scheduler.
-- single-flight.
-- backoff.
-- stale calculation.
-- events.
-- fake provider refresh.
-
-## 7. Acceptance Criteria
-
-- Fake provider uses the same registry interface planned for real providers.
-- Normalized usage is persisted and restored after restart.
-- Frontend cannot execute SQL.
-- Frontend cannot retrieve stored secrets.
-- IPC responses are runtime validated.
-- One provider refresh does not block another.
-- Duplicate refresh requests are coalesced.
-- Child-process abstraction includes timeout and output limits.
-- Database migrations have tests.
-- Repositories use temporary-database tests.
-- Logs redact secret-like content.
-- Provider errors are typed and user-safe.
-- One provider failure does not crash application startup.
-
-## 8. Verification
-
-```text
-pnpm lint
-pnpm typecheck
-pnpm test
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test
-cargo check
-fake-provider integration test
-database migration test
-secret-store interface test
-redaction tests
-```
-
-## 9. Risks
-
-- Frontend/backend contracts may diverge.
-- Secret storage may behave differently by platform.
-- SQL migrations may become destructive.
-- Scheduler can accidentally overlap work.
-- Generic abstractions may become too broad before real providers exist.
-
-## 10. Review Questions
-
-- Is every backend-owned concern still in Rust?
-- Are commands narrow and typed?
-- Can a provider be added without changing unrelated modules?
-- Are errors safe for UI?
-- Does fake provider exercise the real path?
-
-## 11. Exit and Handoff
-
-M5 receives:
-
-- provider interface;
-- transport interfaces;
-- parser boundary;
-- persistence;
-- scheduler;
-- secure storage;
-- stable UI data path.
+See the matching folder under `../tasks/`.

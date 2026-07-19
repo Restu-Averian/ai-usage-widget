@@ -1,28 +1,22 @@
 # AI Usage Dock — Small Tasks
 
-**Document status:** Draft v0.1  
-**Last updated:** 2026-07-16
+**Last updated:** 2026-07-19
 
-This directory contains executable small-task files for milestones M0 through M12.
-
-## Structure
+Executable task folders exist only for M0 through M7.
 
 ```text
 docs/tasks/
-├── README.md
-├── M0/
-├── M1/
-├── ...
-└── M12/
+├── M0/  # completed
+├── M1/  # completed
+├── M2/  # completed
+├── M3/  # completed, corrected scope
+├── M4/  # completed, corrected persistence scope
+├── M5/  # active
+├── M6/  # locked until M5 PASS
+└── M7/  # backlog
 ```
 
-Each milestone folder contains a `README.md` and one file per task.
-
-## Execution
-
-Only the active milestone should normally have tasks moved to `READY` or `IN_PROGRESS`. Start with M0 and M1. Do not execute all task files in one prompt. Future tasks are planning drafts and may be refined after earlier milestone findings.
-
-## Statuses
+Statuses:
 
 ```text
 BACKLOG
@@ -34,4 +28,4 @@ DONE
 CANCELLED
 ```
 
-Always follow root `AGENTS.md`.
+Only one task should normally be `IN_PROGRESS`. Follow root `AGENTS.md` and the linked milestone.

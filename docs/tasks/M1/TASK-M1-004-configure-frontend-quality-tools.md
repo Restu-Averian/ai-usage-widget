@@ -2,80 +2,47 @@
 
 **Milestone:** [M1 — Repository Foundation](../../milestones/M1-repository-foundation.md)  
 **Status:** DONE  
-**Priority:** P0  
-**Last updated:** 2026-07-16
+**Priority:** P2  
+**Last updated:** 2026-07-19
 
----
+## Objective
 
-## 1. Objective
+Complete configure frontend quality tools for the repository foundation.
 
-Configure Frontend Quality Tools as a small, independently reviewable step for Repository Foundation.
+## Dependencies
 
-## 2. Dependencies
+- Milestone prerequisites
 
-- Milestone prerequisites from `../../milestones/M1-repository-foundation.md`
-- Recommended previous task: TASK-M1-003
+## In Scope
 
-## 3. In Scope
+- Complete configure frontend quality tools for the repository foundation.
 
-- Configure TypeScript strictness, ESLint, formatter, and Vitest.
-- Add lint, typecheck, test, and build scripts.
-- Pin tool versions.
+## Out of Scope
 
-## 4. Out of Scope
+- Work from later milestones.
+- Unrelated refactors or restored removed features.
+- Unsafe credential, cookie, generic shell, generic SQL, or secret-read access.
 
-- Work belonging to later tasks or milestones.
-- Unrelated refactors or visual redesigns.
-- Unsafe credential access, browser-cookie extraction, or fabricated provider data.
+## Acceptance Criteria
 
-## 5. Expected Files
+- [x] The repository baseline is present.
+- [x] Relevant checks and documentation exist.
+- [x] No private provider data is committed.
 
-Identify exact affected files before implementation. Typical locations may include:
+## Verification
 
-```text
-docs/
-spike/
-src/
-src-tauri/
-tests/
-```
+- Run focused checks and record honest results.
 
-## 6. Acceptance Criteria
-
-- [ ] The task scope is implemented without unrelated changes.
-- [ ] Relevant automated tests or deterministic verification exist.
-- [ ] Applicable repository checks from `AGENTS.md` pass.
-- [ ] No credential, cookie, token, or raw secret is logged or committed.
-- [ ] Documentation is updated when behavior or architecture changes.
-
-## 7. Verification
-
-- Run focused tests for the changed module.
-- Run applicable lint, typecheck, Rust, build, or manual checks from `AGENTS.md`.
-- Record commands and honest results in the completion report.
-
-## 8. Security Checklist
-
-- [ ] No provider password is requested.
-- [ ] No browser cookie or raw provider credential file is read.
-- [ ] No saved secret is exposed to the frontend.
-- [ ] No generic shell, SQL, filesystem, or secret-read capability is added.
-- [ ] Unknown values are not silently converted to zero.
-- [ ] Subscription and API usage remain separate where relevant.
-
-Mark non-applicable items explicitly during review.
-
-## 9. Completion Report
+## Completion Report
 
 ```text
-- files changed;
-- implementation summary;
-- commands run;
-- tests passed;
-- tests failed;
-- acceptance criteria status;
-- security considerations;
-- architecture deviations;
-- known limitations;
-- recommended next task.
+files changed
+implementation summary
+commands run
+passed and failed checks
+manual verification
+acceptance-criteria status
+security considerations
+known limitations
+recommended next task
 ```

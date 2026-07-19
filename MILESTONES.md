@@ -1,3 +1,7 @@
-This file is a compatibility pointer. The milestone documents have been moved.
+# AI Usage Dock — Milestones
 
-Please see [docs/milestones/README.md](docs/milestones/README.md).
+The canonical roadmap is located at:
+
+[`docs/milestones/README.md`](docs/milestones/README.md)
+
+This root file is retained as a stable repository entry point.

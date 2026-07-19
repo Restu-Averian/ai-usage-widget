@@ -1,69 +1,30 @@
 # Mx — Milestone Name
 
 **Project:** AI Usage Dock  
-**Document status:** Draft  
+**Status:** BACKLOG  
 **Last updated:** YYYY-MM-DD
 
-Related documents:
+## Objective
 
-- `../AI-Usage-Dock-PRD.md`
-- `../AI-Usage-Dock-Technical-Design.md`
-- `../ui-specification/README.md`
-- `../../AGENTS.md`
+State one demonstrable outcome.
 
----
+## Dependencies
 
-## 1. Objective
+List only hard dependencies.
 
-Describe the single primary goal.
+## Deliverables
 
-## 2. Intended Outcome
+- Deliverable.
 
-Describe what can be demonstrated when this milestone is complete.
+## Scope Boundaries
 
-## 3. Dependencies
+- No unrelated work.
+- Preserve `AGENTS.md` boundaries.
 
-List completed milestones, documents, tools, or decisions required.
+## Acceptance Criteria
 
-## 4. In Scope
+- [ ] Observable criterion.
 
-- ...
+## Task Files
 
-## 5. Out of Scope
-
-- ...
-
-## 6. Deliverables
-
-```text
-...
-```
-
-## 7. Suggested Task Groups
-
-### Mx-A — Group
-
-- ...
-
-## 8. Acceptance Criteria
-
-- ...
-
-## 9. Verification
-
-```text
-commands
-manual checks
-```
-
-## 10. Risks
-
-- ...
-
-## 11. Review Questions
-
-- ...
-
-## 12. Exit and Handoff
-
-Describe what the next milestone may safely depend on.
+See `../tasks/Mx/`.
