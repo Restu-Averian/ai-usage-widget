@@ -1,7 +1,7 @@
 # TASK-M5-008 — Simplify Main Popup
 
 **Milestone:** [M5 — Codex Stabilization and Simplification](../../milestones/M5-codex-stabilization-and-simplification.md)  
-**Status:** BACKLOG  
+**Status:** DONE
 **Priority:** P1  
 **Last updated:** 2026-07-19
 
@@ -25,13 +25,15 @@ Remove historical analytics and retain only current provider status, remaining q
 
 ## Acceptance Criteria
 
-- [ ] No historical chart or screen remains.
-- [ ] Codex and Antigravity are the only tabs.
-- [ ] The quota ring represents remaining quota.
+- [x] No historical chart or screen remains.
+- [x] Codex and Antigravity are the only tabs.
+- [x] The quota ring represents remaining quota.
 
 ## Verification
 
-- Run focused checks and record honest results.
+- Removed `HistoryChart` from the popup and deleted the component/CSS.
+- Production `dist` scan found no `Claude`, `Usage history`, `Compact Mode`, theme-selector, or mock-control strings.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` passed.
 
 ## Completion Report
 

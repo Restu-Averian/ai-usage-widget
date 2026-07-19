@@ -139,6 +139,10 @@ impl ProviderConnector for CodexProvider {
             }),
         })
     }
+
+    async fn shutdown(&self) {
+        self.rpc.shutdown().await;
+    }
 }
 
 #[async_trait]
@@ -146,6 +150,7 @@ pub trait CodexRpc: Send + Sync {
     async fn account_read(&self) -> Result<GetAccountResponse, AppError>;
     async fn rate_limits_read(&self) -> Result<GetAccountRateLimitsResponse, AppError>;
     async fn login_start(&self) -> Result<LoginStartResponse, AppError>;
+    async fn shutdown(&self) {}
 }
 
 struct ManagedAppServer {
@@ -214,6 +219,13 @@ impl ManagedAppServer {
         }
         response
     }
+
+    async fn shutdown(&self) {
+        if let Some(mut state) = self.state.lock().await.take() {
+            let _ = state.child.start_kill();
+            let _ = time::timeout(Duration::from_secs(2), state.child.wait()).await;
+        }
+    }
 }
 
 #[async_trait]
@@ -241,6 +253,10 @@ impl CodexRpc for ManagedAppServer {
             )
             .await?;
         serde_json::from_value(value).map_err(|_| AppError::ContractViolation)
+    }
+
+    async fn shutdown(&self) {
+        ManagedAppServer::shutdown(self).await;
     }
 }
 
@@ -624,6 +640,8 @@ mod tests {
                 login_id: "login_1".into(),
             })
         }
+
+        async fn shutdown(&self) {}
     }
 
     #[test]

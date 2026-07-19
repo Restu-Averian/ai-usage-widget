@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  getUsageHistory,
+  getProviderState,
   refreshProvider,
   setFakeProviderScenario,
 } from "../ipc/commands";
-import { HistoryPoint, ProviderId, ProviderState } from "../ipc/types";
+import { ProviderId, ProviderState } from "../ipc/types";
 import { MockProviderScenario } from "../lib/mock/mock-adapter";
 
 function toBackendScenario(scenario: MockProviderScenario) {
@@ -33,15 +33,6 @@ function toBackendScenario(scenario: MockProviderScenario) {
   }
 }
 
-export function useUsageHistory(providerId: ProviderId) {
-  return useQuery<HistoryPoint[], Error>({
-    queryKey: ["usageHistory", providerId],
-    queryFn: () => getUsageHistory(providerId),
-    retry: false,
-    staleTime: 10000,
-  });
-}
-
 export function useProviderUsage(
   providerId: ProviderId,
   scenario: MockProviderScenario,
@@ -51,6 +42,10 @@ export function useProviderUsage(
     queryFn: async () => {
       if (providerId === "codex") {
         return refreshProvider(providerId);
+      }
+
+      if (!import.meta.env.DEV) {
+        return getProviderState(providerId);
       }
 
       if (scenario === "disconnected" || scenario === "loading-without-cache") {

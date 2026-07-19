@@ -2,11 +2,8 @@ import {
   ProviderId,
   ProviderUsage,
   codexConnected,
-  claudeCritical,
-  claudeWarning,
   antigravityModels,
   usageWithoutPercentage,
-  staleClaude,
   offlineCodex,
 } from "./mock-data";
 
@@ -47,8 +44,7 @@ export const MOCK_SCENARIO_OPTIONS: {
 export const DEFAULT_MOCK_SCENARIOS: Record<ProviderId, MockProviderScenario> =
   {
     codex: "connected-normal",
-    claude: "warning",
-    antigravity: "connected-normal",
+    antigravity: "disconnected",
   };
 
 const DELAY_MS = 350;
@@ -56,10 +52,6 @@ const DELAY_MS = 350;
 function baseUsage(providerId: ProviderId): ProviderUsage {
   if (providerId === "antigravity") {
     return antigravityModels;
-  }
-
-  if (providerId === "claude") {
-    return claudeWarning;
   }
 
   return codexConnected;
@@ -87,11 +79,9 @@ export function getCachedUsageForScenario(
       return baseUsage(providerId);
     case "offline":
     case "offline-with-cache":
-      return providerId === "claude" ? staleClaude : offlineCodex;
+      return offlineCodex;
     case "stale":
-      return providerId === "claude"
-        ? staleClaude
-        : { ...baseUsage(providerId), stale: true };
+      return { ...baseUsage(providerId), stale: true };
     default:
       return null;
   }
@@ -114,25 +104,19 @@ export async function fetchProviderUsage(
       return baseUsage(providerId);
     case "warning":
     case "connected-warning":
-      return providerId === "claude"
-        ? claudeWarning
-        : withPrimaryPercent(baseUsage(providerId), 84, 16);
+      return withPrimaryPercent(baseUsage(providerId), 84, 16);
     case "critical":
     case "connected-critical":
-      return providerId === "claude"
-        ? claudeCritical
-        : withPrimaryPercent(baseUsage(providerId), 96, 4);
+      return withPrimaryPercent(baseUsage(providerId), 96, 4);
     case "unknown-percentage":
       return usageWithoutPercentage;
     case "refreshing-with-cache":
       return baseUsage(providerId);
     case "offline":
     case "offline-with-cache":
-      return providerId === "claude" ? staleClaude : offlineCodex;
+      return offlineCodex;
     case "stale":
-      return providerId === "claude"
-        ? staleClaude
-        : { ...baseUsage(providerId), stale: true };
+      return { ...baseUsage(providerId), stale: true };
     case "retryable-error":
     case "error":
       throw new Error(`Retryable usage check failed for ${providerId}`);

@@ -1,7 +1,7 @@
 # TASK-M5-009 — Simplify Settings and Fix Dark Mode
 
 **Milestone:** [M5 — Codex Stabilization and Simplification](../../milestones/M5-codex-stabilization-and-simplification.md)  
-**Status:** BACKLOG  
+**Status:** DONE
 **Priority:** P1  
 **Last updated:** 2026-07-19
 
@@ -25,13 +25,15 @@ Remove compact and appearance controls and keep only useful operational settings
 
 ## Acceptance Criteria
 
-- [ ] No compact-mode control remains.
-- [ ] No theme selector or light/system mode remains.
-- [ ] Refresh interval, launch at login, and connection controls remain.
+- [x] No compact-mode control remains.
+- [x] No theme selector or light/system mode remains.
+- [x] Refresh interval and launch at login remain.
 
 ## Verification
 
-- Run focused checks and record honest results.
+- Removed compact-mode state and fixed the root app to dark mode.
+- Removed the theme selector and deleted the theme preference helper/test.
+- Settings now expose refresh interval and launch-at-login controls; provider connection controls remain in provider-state UI.
 
 ## Completion Report
 

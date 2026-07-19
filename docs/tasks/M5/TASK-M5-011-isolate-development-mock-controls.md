@@ -1,7 +1,7 @@
 # TASK-M5-011 — Isolate Development Mock Controls
 
 **Milestone:** [M5 — Codex Stabilization and Simplification](../../milestones/M5-codex-stabilization-and-simplification.md)  
-**Status:** BACKLOG  
+**Status:** DONE
 **Priority:** P1  
 **Last updated:** 2026-07-19
 
@@ -25,13 +25,15 @@ Keep deterministic mock states available for development and tests but absent fr
 
 ## Acceptance Criteria
 
-- [ ] Production UI has no mock selector.
-- [ ] Production command surface cannot force fake state.
-- [ ] No fake value is used as missing-data fallback.
+- [x] Production UI has no mock selector.
+- [x] Production command surface cannot force fake state.
+- [x] No fake value is used as missing-data fallback.
 
 ## Verification
 
-- Run focused checks and record honest results.
+- Mock controls remain behind `import.meta.env.DEV`.
+- Production Antigravity uses the backend state instead of fake scenario mutation.
+- Production `dist` scan found no developer mock control strings.
 
 ## Completion Report
 

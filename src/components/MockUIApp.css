@@ -19,11 +19,3 @@
     max-width: 440px; /* Constraints inside a native window if needed */
   }
 }
-
-.compact-mode.app-container {
-  /* This mocks the compact mode view */
-  /* For Tauri, we might actually resize the window using the Rust backend,
-     but for the mock UI, we can just apply a CSS class if we want to visually test it inside dev server */
-  max-width: 360px;
-  max-height: 520px;
-}

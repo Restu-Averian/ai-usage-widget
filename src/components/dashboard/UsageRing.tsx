@@ -25,7 +25,7 @@ export function UsageRing({
         aria-label={`${label}: ${display.accessibleLabel}`}
       >
         <span className="text-display-sm">{display.label}</span>
-        <span className="text-body-sm">Usage unavailable</span>
+        <span className="text-body-sm">Remaining unavailable</span>
       </div>
     );
   }

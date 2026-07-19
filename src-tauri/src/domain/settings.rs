@@ -9,8 +9,6 @@ pub struct AppSettings {
     pub close_panel_when_unfocused: bool,
     pub menu_bar: MenuBarSettings,
     pub refresh: RefreshSettings,
-    pub appearance: AppearanceSettings,
-    pub data: DataSettings,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -27,7 +25,6 @@ pub struct MenuBarSettings {
 pub enum DisplayedUsage {
     Highest,
     Codex,
-    Claude,
     Antigravity,
 }
 
@@ -38,27 +35,6 @@ pub struct RefreshSettings {
     pub interval_minutes: u16,
     pub refresh_after_wake: bool,
     pub refresh_when_popup_opens: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AppearanceSettings {
-    pub theme: ThemePreference,
-    pub compact_mode: bool,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum ThemePreference {
-    System,
-    Light,
-    Dark,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DataSettings {
-    pub history_retention_days: Option<u16>,
 }
 
 impl Default for AppSettings {
@@ -79,13 +55,6 @@ impl Default for AppSettings {
                 interval_minutes: 5,
                 refresh_after_wake: true,
                 refresh_when_popup_opens: true,
-            },
-            appearance: AppearanceSettings {
-                theme: ThemePreference::System,
-                compact_mode: false,
-            },
-            data: DataSettings {
-                history_retention_days: Some(30),
             },
         }
     }

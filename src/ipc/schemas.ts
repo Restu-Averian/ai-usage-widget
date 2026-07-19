@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const providerIdSchema = z.enum(["codex", "claude", "antigravity"]);
+export const providerIdSchema = z.enum(["codex", "antigravity"]);
 
 export const connectionTypeSchema = z.enum([
   "subscription-cli",
@@ -152,7 +152,7 @@ export const appSettingsSchema = z.object({
   closePanelWhenUnfocused: z.boolean(),
   menuBar: z.object({
     showPercentage: z.boolean(),
-    displayedUsage: z.enum(["highest", "codex", "claude", "antigravity"]),
+    displayedUsage: z.enum(["highest", "codex", "antigravity"]),
     warningThreshold: z.number().int().min(0).max(100),
     criticalThreshold: z.number().int().min(0).max(100),
   }),
@@ -168,18 +168,6 @@ export const appSettingsSchema = z.object({
     refreshAfterWake: z.boolean(),
     refreshWhenPopupOpens: z.boolean(),
   }),
-  appearance: z.object({
-    theme: z.enum(["system", "light", "dark"]),
-    compactMode: z.boolean(),
-  }),
-  data: z.object({
-    historyRetentionDays: z.number().int().positive().nullable(),
-  }),
-});
-
-export const historyPointSchema = z.object({
-  timestamp: z.string().datetime({ offset: true }),
-  value: z.number().min(0).max(100).nullable(),
 });
 
 export const appBootstrapSchema = z.object({

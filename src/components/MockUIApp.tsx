@@ -7,10 +7,10 @@ import { SettingsLayout } from "./settings/SettingsLayout";
 import "./MockUIApp.css";
 
 export function MockUIApp() {
-  const { viewState, compactMode } = useUiStore();
+  const { viewState } = useUiStore();
 
   return (
-    <div className={`app-container ${compactMode ? "compact-mode" : ""}`}>
+    <div className="app-container">
       <AppHeader />
 
       {viewState === "dashboard" ? (

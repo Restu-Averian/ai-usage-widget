@@ -9,6 +9,10 @@ pub fn codex_loading_tray_label() -> String {
     "Codex Loading…".into()
 }
 
+fn remaining_percent(used_percent: f64) -> f64 {
+    (100.0 - used_percent).clamp(0.0, 100.0)
+}
+
 pub fn codex_tray_label(state: &ProviderState) -> String {
     match state.status {
         ProviderStateKind::NotInstalled => "Codex CLI unavailable".into(),
@@ -19,13 +23,13 @@ pub fn codex_tray_label(state: &ProviderState) -> String {
                 .windows
                 .first()
                 .and_then(|window| window.used_percent)
-                .map(|percent| format!("Codex {}% used", percent.round()))
-                .unwrap_or_else(|| "Codex --%".into()),
+                .map(|percent| format!("Codex — {}% remaining", remaining_percent(percent).round()))
+                .unwrap_or_else(|| "Codex —".into()),
             None => match state.last_error.as_ref().map(|error| error.code) {
                 Some(AppErrorCode::AuthenticationExpired) => "Codex Sign in required".into(),
                 Some(AppErrorCode::ProviderUnavailable) => "Codex CLI unavailable".into(),
                 Some(AppErrorCode::Unsupported) => "Codex CLI unsupported".into(),
-                _ => "Codex --%".into(),
+                _ => "Codex —".into(),
             },
         },
     }
@@ -70,11 +74,11 @@ mod tests {
             last_error: None,
             is_refreshing: false,
         };
-        assert_eq!(codex_tray_label(&state), "Codex 28% used");
+        assert_eq!(codex_tray_label(&state), "Codex — 72% remaining");
 
         usage.windows[0].used_percent = None;
         state.usage = Some(usage);
-        assert_eq!(codex_tray_label(&state), "Codex --%");
+        assert_eq!(codex_tray_label(&state), "Codex —");
 
         state.usage = None;
         state.last_error = Some(AppError::AuthenticationExpired.payload());

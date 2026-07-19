@@ -145,11 +145,11 @@ impl AppStateHandle {
         }
     }
 
-    pub fn scheduler_if_ready(&self) -> Option<Arc<RefreshCoordinator>> {
+    pub fn state_if_ready(&self) -> Option<AppState> {
         self.state
             .get()
             .and_then(|result| result.as_ref().ok())
-            .map(|state| state.scheduler.clone())
+            .cloned()
     }
 }
 
@@ -168,6 +168,6 @@ mod tests {
     async fn test_state_uses_fake_dependencies() {
         let state = AppState::test().await.expect("state");
 
-        assert_eq!(state.providers.list_metadata().len(), 3);
+        assert_eq!(state.providers.list_metadata().len(), 2);
     }
 }

@@ -4,7 +4,6 @@ import "./ProviderTabs.css";
 
 const PROVIDERS: { id: ProviderId; label: string }[] = [
   { id: "codex", label: "Codex" },
-  { id: "claude", label: "Claude" },
   { id: "antigravity", label: "Antigravity" },
 ];
 

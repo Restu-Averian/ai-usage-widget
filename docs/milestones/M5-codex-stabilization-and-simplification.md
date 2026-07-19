@@ -35,9 +35,9 @@ M0–M4
 - [ ] Left-click, right-click, and Quit work.
 - [ ] Codex failure leaves tray operational.
 - [ ] No duplicate Codex app-server exists.
-- [ ] 45% used renders as 55% remaining everywhere.
-- [ ] Unknown renders as —.
-- [ ] Removed features are absent from production.
+- [x] 45% used renders as 55% remaining everywhere.
+- [x] Unknown renders as —.
+- [x] Removed features are absent from production.
 - [ ] Latest cached snapshot survives restart.
 - [ ] Relevant automated and macOS manual checks pass.
 

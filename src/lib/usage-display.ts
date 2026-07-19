@@ -13,7 +13,7 @@ export type UsagePercentDisplay =
       kind: "unknown";
       label: "—";
       progressValue: null;
-      accessibleLabel: "Usage unavailable";
+      accessibleLabel: "Remaining quota unavailable";
     };
 
 export function isKnownUsagePercent(
@@ -22,16 +22,27 @@ export function isKnownUsagePercent(
   return typeof value === "number" && Number.isFinite(value);
 }
 
+export function toRemainingPercent(
+  usedPercent: UsageWindow["usedPercent"],
+): number | null {
+  if (!isKnownUsagePercent(usedPercent)) {
+    return null;
+  }
+
+  return Math.min(100, Math.max(0, 100 - usedPercent));
+}
+
 export function getUsageTone(value: UsageWindow["usedPercent"]): UsageTone {
-  if (!isKnownUsagePercent(value)) {
+  const remaining = toRemainingPercent(value);
+  if (remaining == null) {
     return "unknown";
   }
 
-  if (value >= 95) {
+  if (remaining <= 5) {
     return "critical";
   }
 
-  if (value >= 80) {
+  if (remaining <= 15) {
     return "warning";
   }
 
@@ -41,22 +52,23 @@ export function getUsageTone(value: UsageWindow["usedPercent"]): UsageTone {
 export function getUsagePercentDisplay(
   value: UsageWindow["usedPercent"],
 ): UsagePercentDisplay {
-  if (!isKnownUsagePercent(value)) {
+  const remaining = toRemainingPercent(value);
+  if (remaining == null) {
     return {
       kind: "unknown",
       label: "—",
       progressValue: null,
-      accessibleLabel: "Usage unavailable",
+      accessibleLabel: "Remaining quota unavailable",
     };
   }
 
-  const rounded = Math.round(value);
+  const rounded = Math.round(remaining);
 
   return {
     kind: "known",
     label: `${rounded}%`,
-    progressValue: Math.min(100, Math.max(0, value)),
-    accessibleLabel: `${rounded} percent used`,
+    progressValue: remaining,
+    accessibleLabel: `${rounded} percent remaining`,
   };
 }
 

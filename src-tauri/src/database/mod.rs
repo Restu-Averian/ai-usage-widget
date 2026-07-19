@@ -8,8 +8,8 @@ use sqlx::{Executor, Row, SqlitePool};
 use uuid::Uuid;
 
 use crate::domain::{
-    AppError, AppSettings, ConnectionType, HistoryPoint, ProviderConnection, ProviderId,
-    ProviderStateKind, ProviderUsage, Reliability, UsagePeriod, UsageWindow,
+    AppError, AppSettings, ConnectionType, ProviderConnection, ProviderId, ProviderStateKind,
+    ProviderUsage, Reliability, UsagePeriod, UsageWindow,
 };
 
 const MIGRATIONS: &[Migration] = &[Migration {
@@ -206,6 +206,11 @@ impl Database {
         }
 
         let mut tx = self.pool.begin().await.map_err(|_| AppError::Database)?;
+        sqlx::query("DELETE FROM usage_snapshots WHERE provider = ?")
+            .bind(serde_string(&usage.provider)?)
+            .execute(&mut *tx)
+            .await
+            .map_err(|_| AppError::Database)?;
         sqlx::query(
             "INSERT INTO usage_snapshots (
                 id, provider, connection_type, account_label, plan_name, reliability,
@@ -274,36 +279,6 @@ impl Database {
         };
 
         self.usage_from_snapshot_row(snapshot).await.map(Some)
-    }
-
-    pub async fn history(
-        &self,
-        provider: ProviderId,
-        limit: i64,
-    ) -> Result<Vec<HistoryPoint>, AppError> {
-        let rows = sqlx::query(
-            "SELECT s.captured_at, w.used_percent
-             FROM usage_snapshots s
-             LEFT JOIN usage_windows w ON w.snapshot_id = s.id
-             WHERE s.provider = ?
-             GROUP BY s.id
-             ORDER BY s.captured_at DESC
-             LIMIT ?",
-        )
-        .bind(serde_string(&provider)?)
-        .bind(limit)
-        .fetch_all(&self.pool)
-        .await
-        .map_err(|_| AppError::Database)?;
-
-        rows.into_iter()
-            .map(|row| {
-                Ok(HistoryPoint {
-                    timestamp: parse_utc(row.get::<String, _>("captured_at"))?,
-                    value: row.get("used_percent"),
-                })
-            })
-            .collect()
     }
 
     pub async fn save_settings(&self, settings: &AppSettings) -> Result<(), AppError> {
@@ -626,7 +601,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn history_is_ordered_newest_first() {
+    async fn snapshot_repository_keeps_only_latest_per_provider() {
         let database = Database::in_memory().await.expect("database");
         let mut older = sample_usage(Some(10.0));
         older.fetched_at = chrono::DateTime::parse_from_rfc3339("2026-07-18T00:00:00Z")
@@ -640,10 +615,18 @@ mod tests {
         database.save_usage_snapshot(&older).await.expect("older");
         database.save_usage_snapshot(&newer).await.expect("newer");
 
-        let history = database.history(older.provider, 10).await.expect("history");
+        let latest = database
+            .latest_usage(ProviderId::Codex)
+            .await
+            .expect("latest")
+            .expect("usage");
+        let row: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM usage_snapshots")
+            .fetch_one(database.pool())
+            .await
+            .expect("count");
 
-        assert_eq!(history[0].value, Some(20.0));
-        assert_eq!(history[1].value, Some(10.0));
+        assert_eq!(latest.windows[0].used_percent, Some(20.0));
+        assert_eq!(row.0, 1);
     }
 
     #[tokio::test]

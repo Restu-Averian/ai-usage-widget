@@ -4,8 +4,8 @@ use uuid::Uuid;
 
 use crate::app_state::{AppState, AppStateHandle};
 use crate::domain::{
-    AppErrorPayload, AppSettings, ConnectionType, HistoryPoint, LoginLaunchResult, ProviderId,
-    ProviderMetadata, ProviderStateKind, ProviderUsage,
+    AppErrorPayload, AppSettings, ConnectionType, LoginLaunchResult, ProviderId, ProviderMetadata,
+    ProviderStateKind, ProviderUsage,
 };
 use crate::providers::FakeProviderScenario;
 use crate::secrets::SecretKey;
@@ -68,13 +68,6 @@ pub struct ProviderState {
 pub struct ProviderRequest {
     pub provider: ProviderId,
     pub scenario: Option<FakeProviderScenario>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct HistoryRequest {
-    pub provider: ProviderId,
-    pub limit: Option<i64>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -206,20 +199,6 @@ pub async fn update_settings_data(
 ) -> CommandResult<AppSettings> {
     match state.database.save_settings(&settings).await {
         Ok(()) => CommandResult::ok(settings),
-        Err(error) => CommandResult::err(error.payload()),
-    }
-}
-
-pub async fn get_usage_history_data(
-    state: &AppState,
-    request: HistoryRequest,
-) -> CommandResult<Vec<HistoryPoint>> {
-    match state
-        .database
-        .history(request.provider, request.limit.unwrap_or(30))
-        .await
-    {
-        Ok(history) => CommandResult::ok(history),
         Err(error) => CommandResult::err(error.payload()),
     }
 }
@@ -419,18 +398,6 @@ pub async fn update_settings(
 }
 
 #[tauri::command]
-pub async fn get_usage_history(
-    state: tauri::State<'_, Arc<AppStateHandle>>,
-    request: HistoryRequest,
-) -> Result<CommandResult<Vec<HistoryPoint>>, String> {
-    let state = match state.get().await {
-        Ok(state) => state,
-        Err(error) => return Ok(CommandResult::err(error)),
-    };
-    Ok(get_usage_history_data(&state, request).await)
-}
-
-#[tauri::command]
 pub async fn save_provider_api_key(
     state: tauri::State<'_, Arc<AppStateHandle>>,
     request: SaveProviderSecretRequest,
@@ -477,7 +444,7 @@ mod tests {
         let result = get_app_bootstrap_data(&state).await;
 
         assert!(result.ok);
-        assert_eq!(result.data.expect("data").providers.len(), 3);
+        assert_eq!(result.data.expect("data").providers.len(), 2);
     }
 
     #[tokio::test]

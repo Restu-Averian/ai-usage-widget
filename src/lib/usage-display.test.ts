@@ -3,9 +3,21 @@ import {
   getUsagePercentDisplay,
   getUsageTone,
   isKnownUsagePercent,
+  toRemainingPercent,
 } from "./usage-display";
 
 describe("usage display helpers", () => {
+  it.each([
+    [0, 100],
+    [45, 55],
+    [100, 0],
+    [null, null],
+    [-5, 100],
+    [120, 0],
+  ] as const)("maps %s used to %s remaining", (used, remaining) => {
+    expect(toRemainingPercent(used)).toBe(remaining);
+  });
+
   it.each([undefined, null])(
     "treats %s usage as unavailable instead of zero",
     (value) => {
@@ -16,7 +28,7 @@ describe("usage display helpers", () => {
         kind: "unknown",
         label: "—",
         progressValue: null,
-        accessibleLabel: "Usage unavailable",
+        accessibleLabel: "Remaining quota unavailable",
       });
     },
   );
@@ -30,9 +42,10 @@ describe("usage display helpers", () => {
 
   it.each([
     [79.99, "normal"],
-    [80, "warning"],
-    [95, "critical"],
-  ] as const)("maps %s percent to %s tone", (percent, tone) => {
+    [80, "normal"],
+    [85, "warning"],
+    [96, "critical"],
+  ] as const)("maps %s used percent to %s remaining tone", (percent, tone) => {
     expect(getUsageTone(percent)).toBe(tone);
   });
 });

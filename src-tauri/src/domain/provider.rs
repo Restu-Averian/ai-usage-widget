@@ -5,21 +5,15 @@ use std::fmt;
 #[serde(rename_all = "kebab-case")]
 pub enum ProviderId {
     Codex,
-    Claude,
     Antigravity,
 }
 
 impl ProviderId {
-    pub const ALL: [ProviderId; 3] = [
-        ProviderId::Codex,
-        ProviderId::Claude,
-        ProviderId::Antigravity,
-    ];
+    pub const ALL: [ProviderId; 2] = [ProviderId::Codex, ProviderId::Antigravity];
 
     pub fn as_str(self) -> &'static str {
         match self {
             ProviderId::Codex => "codex",
-            ProviderId::Claude => "claude",
             ProviderId::Antigravity => "antigravity",
         }
     }

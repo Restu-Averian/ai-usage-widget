@@ -3,7 +3,6 @@ import {
   appBootstrapSchema,
   appErrorPayloadSchema,
   appSettingsSchema,
-  historyPointSchema,
   providerIdSchema,
   providerMetadataSchema,
   providerStateSchema,
@@ -21,7 +20,6 @@ export type LoginLaunchResult = z.infer<typeof loginLaunchResultSchema>;
 export type AppSettings = z.infer<typeof appSettingsSchema>;
 export type AppBootstrap = z.infer<typeof appBootstrapSchema>;
 export type AppErrorPayload = z.infer<typeof appErrorPayloadSchema>;
-export type HistoryPoint = z.infer<typeof historyPointSchema>;
 
 export type RefreshReason =
   "manual" | "startup" | "scheduled" | "popup-open" | "wake";

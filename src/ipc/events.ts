@@ -24,9 +24,6 @@ export function registerBackendEventInvalidation(queryClient: QueryClient) {
       void queryClient.invalidateQueries({
         queryKey: ["providerUsage", provider.data],
       });
-      void queryClient.invalidateQueries({
-        queryKey: ["usageHistory", provider.data],
-      });
     }),
   );
 

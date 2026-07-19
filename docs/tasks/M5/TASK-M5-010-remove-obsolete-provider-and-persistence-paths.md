@@ -1,7 +1,7 @@
 # TASK-M5-010 — Remove Obsolete Provider and Persistence Paths
 
 **Milestone:** [M5 — Codex Stabilization and Simplification](../../milestones/M5-codex-stabilization-and-simplification.md)  
-**Status:** BACKLOG  
+**Status:** PARTIAL
 **Priority:** P1  
 **Last updated:** 2026-07-19
 
@@ -25,13 +25,16 @@ Remove obsolete provider registry entries, fixtures, tray labels, tests, and his
 
 ## Acceptance Criteria
 
-- [ ] The active registry contains only Codex and Antigravity.
-- [ ] No historical writer/query/retention path remains.
-- [ ] Migration cleanup is safe for the unreleased app.
+- [x] The active registry contains only Codex and Antigravity.
+- [x] No historical query/retention path remains.
+- [x] Snapshot writes now keep only the latest snapshot per provider.
+- [ ] Migration/table naming cleanup is still deferred; existing unreleased tables are reused for latest-cache storage.
 
 ## Verification
 
-- Run focused checks and record honest results.
+- Removed Claude from active provider unions, production registry, tray menu, frontend schema, tabs, and fixtures.
+- Removed frontend/Rust usage-history command/query paths.
+- `cd src-tauri && cargo test` passed, including latest-only persistence coverage.
 
 ## Completion Report
 

@@ -41,22 +41,16 @@ export function UsageHero({ usage }: UsageHeroProps) {
       <div className="hero-ring-container">
         <UsageRing
           percentage={primaryWindow.usedPercent}
-          label={primaryWindow.label}
+          label={`Remaining ${primaryWindow.period}`}
         />
         <span className="text-body-sm period-label">
           {display.kind === "unknown"
-            ? "Usage unavailable"
-            : `Used ${primaryWindow.period}`}
+            ? `Remaining ${primaryWindow.period}`
+            : `Remaining ${primaryWindow.period}`}
         </span>
       </div>
 
       <div className="hero-footer text-body-sm">
-        {display.kind === "known" && primaryWindow.remainingPercent != null && (
-          <span>
-            {Math.round(primaryWindow.remainingPercent)}% remaining
-            &middot;{" "}
-          </span>
-        )}
         <span>{formatReset(primaryWindow.resetAt)}</span>
       </div>
     </div>

@@ -46,6 +46,7 @@ pub trait ProviderConnector: Send + Sync {
             "provider login is unavailable".into(),
         ))
     }
+    async fn shutdown(&self) {}
 }
 
 #[derive(Clone)]
@@ -71,19 +72,9 @@ impl ProviderRegistry {
     }
 
     pub fn production() -> Self {
-        let fake_scenarios = Arc::new(RwLock::new(
-            ProviderId::ALL
-                .into_iter()
-                .map(|provider| (provider, FakeProviderScenario::ConnectedNormal))
-                .collect(),
-        ));
         Self::new(vec![
             Arc::new(CodexProvider::production()) as Arc<dyn ProviderConnector>,
-            Arc::new(FakeProvider::new(
-                ProviderId::Claude,
-                fake_scenarios.clone(),
-            )) as Arc<dyn ProviderConnector>,
-            Arc::new(FakeProvider::new(ProviderId::Antigravity, fake_scenarios))
+            Arc::new(UnimplementedProvider::new(ProviderId::Antigravity))
                 as Arc<dyn ProviderConnector>,
         ])
     }
@@ -164,6 +155,12 @@ impl ProviderRegistry {
         })?;
         connector.start_login().await
     }
+
+    pub async fn shutdown_all(&self) {
+        for connector in self.providers.values() {
+            connector.shutdown().await;
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -184,6 +181,51 @@ struct FakeProvider {
     scenarios: Arc<RwLock<HashMap<ProviderId, FakeProviderScenario>>>,
 }
 
+struct UnimplementedProvider {
+    provider: ProviderId,
+}
+
+impl UnimplementedProvider {
+    fn new(provider: ProviderId) -> Self {
+        Self { provider }
+    }
+}
+
+#[async_trait]
+impl ProviderConnector for UnimplementedProvider {
+    fn id(&self) -> ProviderId {
+        self.provider
+    }
+
+    fn label(&self) -> &'static str {
+        match self.provider {
+            ProviderId::Codex => "Codex",
+            ProviderId::Antigravity => "Antigravity",
+        }
+    }
+
+    fn capabilities(&self) -> ProviderCapabilities {
+        ProviderCapabilities {
+            can_detect_installation: false,
+            can_detect_authentication: false,
+            can_start_login: false,
+            can_fetch_subscription_usage: false,
+            can_fetch_api_usage: false,
+            can_disconnect_local_connection: false,
+            requires_tty: false,
+            supports_multiple_windows: false,
+            supports_model_windows: false,
+        }
+    }
+
+    async fn fetch_usage(&self, _context: FetchContext) -> Result<ProviderUsage, AppError> {
+        Err(AppError::ProviderUnavailable(format!(
+            "{} integration is not implemented in M5",
+            self.label()
+        )))
+    }
+}
+
 impl FakeProvider {
     fn new(
         provider: ProviderId,
@@ -202,7 +244,6 @@ impl FakeProvider {
             FakeProviderScenario::UnknownPercentage => (None, None),
             _ => match self.provider {
                 ProviderId::Codex => (Some(68.0), Some(32.0)),
-                ProviderId::Claude => (Some(42.0), Some(58.0)),
                 ProviderId::Antigravity => (Some(81.0), Some(19.0)),
             },
         }
@@ -218,7 +259,6 @@ impl ProviderConnector for FakeProvider {
     fn label(&self) -> &'static str {
         match self.provider {
             ProviderId::Codex => "Codex",
-            ProviderId::Claude => "Claude",
             ProviderId::Antigravity => "Antigravity",
         }
     }
@@ -313,9 +353,8 @@ mod tests {
         let registry = ProviderRegistry::fake();
         let providers = registry.list_metadata();
 
-        assert_eq!(providers.len(), 3);
+        assert_eq!(providers.len(), 2);
         assert!(registry.get(ProviderId::Codex).is_some());
-        assert!(registry.get(ProviderId::Claude).is_some());
         assert!(registry.get(ProviderId::Antigravity).is_some());
     }
 
@@ -341,6 +380,6 @@ mod tests {
                 .await,
             Err(AppError::RetryableProviderError(_))
         ));
-        assert_eq!(registry.list_metadata().len(), 3);
+        assert_eq!(registry.list_metadata().len(), 2);
     }
 }

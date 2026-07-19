@@ -4,7 +4,6 @@ import {
   appBootstrapSchema,
   appSettingsSchema,
   commandResultSchema,
-  historyPointSchema,
   loginLaunchResultSchema,
   providerIdSchema,
   providerMetadataSchema,
@@ -13,7 +12,6 @@ import {
 import {
   AppBootstrap,
   AppSettings,
-  HistoryPoint,
   LoginLaunchResult,
   ProviderId,
   ProviderMetadata,
@@ -91,10 +89,4 @@ export function getSettings(): Promise<AppSettings> {
 
 export function updateSettings(settings: AppSettings): Promise<AppSettings> {
   return invokeResult("update_settings", appSettingsSchema, { settings });
-}
-
-export function getUsageHistory(provider: ProviderId): Promise<HistoryPoint[]> {
-  return invokeResult("get_usage_history", z.array(historyPointSchema), {
-    request: { provider, limit: 30 },
-  });
 }

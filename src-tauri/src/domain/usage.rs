@@ -150,13 +150,6 @@ pub struct ProviderUsage {
     pub warnings: Vec<UsageWarning>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct HistoryPoint {
-    pub timestamp: DateTime<Utc>,
-    pub value: Option<f64>,
-}
-
 impl ProviderUsage {
     pub fn new(
         provider: ProviderId,

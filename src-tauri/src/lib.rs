@@ -58,11 +58,14 @@ fn set_autostart_state(app: tauri::AppHandle, enable: bool) -> Result<(), String
     }
 }
 
-fn shutdown_scheduler(app: &tauri::AppHandle) {
+fn shutdown_backend(app: &tauri::AppHandle) {
     if let Some(state) = app.try_state::<Arc<app_state::AppStateHandle>>() {
-        if let Some(scheduler) = state.scheduler_if_ready() {
-            tauri::async_runtime::block_on(scheduler.shutdown());
-        }
+        tauri::async_runtime::block_on(async {
+            if let Some(app_state) = state.state_if_ready() {
+                app_state.scheduler.shutdown().await;
+                app_state.providers.shutdown_all().await;
+            }
+        });
     }
 }
 
@@ -99,7 +102,6 @@ pub fn run() {
             commands::start_provider_login,
             commands::get_settings,
             commands::update_settings,
-            commands::get_usage_history,
             commands::save_provider_api_key,
             commands::delete_provider_api_key,
             commands::set_fake_provider_scenario
@@ -124,12 +126,10 @@ pub fn run() {
                 None::<&str>,
             )?;
             app.manage(crate::tray::CodexTrayMenuItem(codex_i.clone()));
-            let claude_i =
-                MenuItem::with_id(app, "claude", "Claude         --%", false, None::<&str>)?;
             let ag_i = MenuItem::with_id(
                 app,
                 "antigravity",
-                "Antigravity    --%",
+                "Antigravity — Not connected",
                 false,
                 None::<&str>,
             )?;
@@ -154,7 +154,6 @@ pub fn run() {
                     &refresh_i,
                     &separator,
                     &codex_i,
-                    &claude_i,
                     &ag_i,
                     &separator,
                     &settings_i,
@@ -179,7 +178,7 @@ pub fn run() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(move |app, event| {
                     if event.id.as_ref() == "quit" {
-                        shutdown_scheduler(app);
+                        shutdown_backend(app);
                         app.exit(0);
                     } else if event.id.as_ref() == "toggle" {
                         if let Some(window) = app.get_webview_window("usage-popup") {

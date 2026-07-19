@@ -3,7 +3,6 @@ import { useProviderUsage } from "../../stores/queries";
 import { startProviderLogin } from "../../ipc/commands";
 import { UsageHero } from "./UsageHero";
 import { QuotaCard } from "./QuotaCard";
-import { HistoryChart } from "./HistoryChart";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 import "./DashboardContent.css";
@@ -166,8 +165,6 @@ export function DashboardContent() {
           ))}
         </div>
       )}
-
-      <HistoryChart />
 
       <div className="source-info text-caption">Source: {data.reliability}</div>
     </div>
