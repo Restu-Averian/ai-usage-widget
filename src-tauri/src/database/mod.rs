@@ -199,6 +199,12 @@ impl Database {
     }
 
     pub async fn save_usage_snapshot(&self, usage: &ProviderUsage) -> Result<(), AppError> {
+        if let Some(latest) = self.latest_usage(usage.provider).await? {
+            if snapshots_match_meaningfully(&latest, usage) {
+                return Ok(());
+            }
+        }
+
         let mut tx = self.pool.begin().await.map_err(|_| AppError::Database)?;
         sqlx::query(
             "INSERT INTO usage_snapshots (
@@ -527,6 +533,17 @@ fn parse_utc(value: String) -> Result<DateTime<Utc>, AppError> {
         .map_err(|_| AppError::Database)
 }
 
+fn snapshots_match_meaningfully(left: &ProviderUsage, right: &ProviderUsage) -> bool {
+    left.provider == right.provider
+        && left.connection_type == right.connection_type
+        && left.account_label == right.account_label
+        && left.plan_name == right.plan_name
+        && left.reliability == right.reliability
+        && left.stale == right.stale
+        && left.warnings == right.warnings
+        && left.windows == right.windows
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -583,6 +600,29 @@ mod tests {
             .expect("usage");
 
         assert_eq!(latest.windows[0].used_percent, None);
+    }
+
+    #[tokio::test]
+    async fn snapshot_repository_skips_duplicate_meaningful_snapshots() {
+        let database = Database::in_memory().await.expect("database");
+        let mut first = sample_usage(Some(28.0));
+        let mut second = sample_usage(Some(28.0));
+        second.id = "different-id".into();
+        first.fetched_at = chrono::DateTime::parse_from_rfc3339("2026-07-18T00:00:00Z")
+            .expect("date")
+            .with_timezone(&chrono::Utc);
+        second.fetched_at = chrono::DateTime::parse_from_rfc3339("2026-07-18T00:01:00Z")
+            .expect("date")
+            .with_timezone(&chrono::Utc);
+
+        database.save_usage_snapshot(&first).await.expect("first");
+        database.save_usage_snapshot(&second).await.expect("second");
+
+        let row: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM usage_snapshots")
+            .fetch_one(database.pool())
+            .await
+            .expect("count");
+        assert_eq!(row.0, 1);
     }
 
     #[tokio::test]

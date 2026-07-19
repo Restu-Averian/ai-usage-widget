@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUsageHistory, setFakeProviderScenario } from "../ipc/commands";
-import { HistoryPoint, ProviderId, ProviderUsage } from "../ipc/types";
+import {
+  getUsageHistory,
+  refreshProvider,
+  setFakeProviderScenario,
+} from "../ipc/commands";
+import { HistoryPoint, ProviderId, ProviderState } from "../ipc/types";
 import { MockProviderScenario } from "../lib/mock/mock-adapter";
 
 function toBackendScenario(scenario: MockProviderScenario) {
@@ -42,18 +46,24 @@ export function useProviderUsage(
   providerId: ProviderId,
   scenario: MockProviderScenario,
 ) {
-  return useQuery<ProviderUsage | null, Error>({
+  return useQuery<ProviderState, Error>({
     queryKey: ["providerUsage", providerId, scenario],
     queryFn: async () => {
-      if (scenario === "disconnected" || scenario === "loading-without-cache") {
-        return null;
+      if (providerId === "codex") {
+        return refreshProvider(providerId);
       }
 
-      const state = await setFakeProviderScenario(
-        providerId,
-        toBackendScenario(scenario),
-      );
-      return state.usage ?? null;
+      if (scenario === "disconnected" || scenario === "loading-without-cache") {
+        return {
+          provider: providerId,
+          status: "authentication-required",
+          usage: null,
+          lastError: null,
+          isRefreshing: false,
+        };
+      }
+
+      return setFakeProviderScenario(providerId, toBackendScenario(scenario));
     },
     refetchInterval: 30000,
     retry: false,

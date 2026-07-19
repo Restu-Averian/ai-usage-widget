@@ -5,6 +5,9 @@ use async_trait::async_trait;
 use chrono::Utc;
 use tokio::sync::RwLock;
 
+mod codex;
+pub use codex::CodexProvider;
+
 use crate::domain::{
     AppError, ConnectionType, ProviderCapabilities, ProviderId, ProviderMetadata, ProviderUsage,
     Reliability, UsagePeriod, UsageWarning, UsageWindow,
@@ -38,6 +41,11 @@ pub trait ProviderConnector: Send + Sync {
     fn label(&self) -> &'static str;
     fn capabilities(&self) -> ProviderCapabilities;
     async fn fetch_usage(&self, context: FetchContext) -> Result<ProviderUsage, AppError>;
+    async fn start_login(&self) -> Result<crate::domain::LoginLaunchResult, AppError> {
+        Err(AppError::Unsupported(
+            "provider login is unavailable".into(),
+        ))
+    }
 }
 
 #[derive(Clone)]
@@ -60,6 +68,24 @@ impl ProviderRegistry {
 
     pub fn fake() -> Self {
         Self::fake_with_scenario(FakeProviderScenario::ConnectedNormal)
+    }
+
+    pub fn production() -> Self {
+        let fake_scenarios = Arc::new(RwLock::new(
+            ProviderId::ALL
+                .into_iter()
+                .map(|provider| (provider, FakeProviderScenario::ConnectedNormal))
+                .collect(),
+        ));
+        Self::new(vec![
+            Arc::new(CodexProvider::production()) as Arc<dyn ProviderConnector>,
+            Arc::new(FakeProvider::new(
+                ProviderId::Claude,
+                fake_scenarios.clone(),
+            )) as Arc<dyn ProviderConnector>,
+            Arc::new(FakeProvider::new(ProviderId::Antigravity, fake_scenarios))
+                as Arc<dyn ProviderConnector>,
+        ])
     }
 
     pub fn fake_with_scenario(scenario: FakeProviderScenario) -> Self {
@@ -127,6 +153,16 @@ impl ProviderRegistry {
         };
         fake_scenarios.write().await.insert(provider, scenario);
         Ok(())
+    }
+
+    pub async fn start_login(
+        &self,
+        provider: ProviderId,
+    ) -> Result<crate::domain::LoginLaunchResult, AppError> {
+        let connector = self.get(provider).ok_or_else(|| {
+            AppError::ProviderUnavailable(format!("{provider} is not registered"))
+        })?;
+        connector.start_login().await
     }
 }
 

@@ -8,6 +8,7 @@ pub mod process;
 pub mod providers;
 pub mod scheduler;
 pub mod secrets;
+pub mod tray;
 
 use tauri::{
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
@@ -18,6 +19,7 @@ use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tauri_plugin_positioner::{Position, WindowExt};
 
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 struct AutoHideGuard(AtomicBool);
 struct ToggleMenuItem(tauri::menu::MenuItem<tauri::Wry>);
@@ -57,8 +59,10 @@ fn set_autostart_state(app: tauri::AppHandle, enable: bool) -> Result<(), String
 }
 
 fn shutdown_scheduler(app: &tauri::AppHandle) {
-    if let Some(state) = app.try_state::<app_state::AppState>() {
-        tauri::async_runtime::block_on(state.scheduler.shutdown());
+    if let Some(state) = app.try_state::<Arc<app_state::AppStateHandle>>() {
+        if let Some(scheduler) = state.scheduler_if_ready() {
+            tauri::async_runtime::block_on(scheduler.shutdown());
+        }
     }
 }
 
@@ -92,6 +96,7 @@ pub fn run() {
             commands::get_provider_state,
             commands::refresh_provider,
             commands::refresh_all_providers,
+            commands::start_provider_login,
             commands::get_settings,
             commands::update_settings,
             commands::get_usage_history,
@@ -102,21 +107,23 @@ pub fn run() {
         .setup(|app| {
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-            let app_data_dir = app.path().app_data_dir()?;
-            std::fs::create_dir_all(&app_data_dir)?;
-            let state = tauri::async_runtime::block_on(app_state::AppState::production(
-                app_data_dir.join("ai-usage-dock.sqlite3"),
-                app.handle().clone(),
-            ))?;
-            app.manage(state);
+
+            let state = Arc::new(app_state::AppStateHandle::new());
+            app.manage(state.clone());
 
             let toggle_i =
                 MenuItem::with_id(app, "toggle", "Open AI Usage Dock", true, None::<&str>)?;
             app.manage(ToggleMenuItem(toggle_i.clone()));
             let refresh_i = MenuItem::with_id(app, "refresh", "Refresh All", true, None::<&str>)?;
 
-            let codex_i =
-                MenuItem::with_id(app, "codex", "Codex          --%", false, None::<&str>)?;
+            let codex_i = MenuItem::with_id(
+                app,
+                "codex",
+                crate::tray::codex_loading_tray_label(),
+                false,
+                None::<&str>,
+            )?;
+            app.manage(crate::tray::CodexTrayMenuItem(codex_i.clone()));
             let claude_i =
                 MenuItem::with_id(app, "claude", "Claude         --%", false, None::<&str>)?;
             let ag_i = MenuItem::with_id(
@@ -159,9 +166,14 @@ pub fn run() {
             let toggle_i_clone = toggle_i.clone();
             let toggle_i_tray = toggle_i.clone();
 
-            TrayIconBuilder::with_id("main")
+            let icon = app
+                .default_window_icon()
+                .cloned()
+                .ok_or(tauri::Error::UnknownPath)?;
+
+            let tray_icon = TrayIconBuilder::with_id("main")
                 .tooltip("AI Usage Dock")
-                .icon(app.default_window_icon().unwrap().clone())
+                .icon(icon)
                 .icon_as_template(true)
                 .menu(&menu)
                 .show_menu_on_left_click(false)
@@ -208,6 +220,59 @@ pub fn run() {
                     }
                 })
                 .build(app)?;
+            app.manage(crate::tray::MainTrayIcon(tray_icon));
+
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                eprintln!("[startup] desktop shell ready; starting backend initialization");
+                let database_path = match app_handle.path().app_data_dir() {
+                    Ok(path) => path.join("ai-usage-dock.sqlite3"),
+                    Err(_) => {
+                        state.initialize_failed(domain::AppError::Database.payload());
+                        return;
+                    }
+                };
+                state
+                    .initialize_production(database_path, app_handle.clone())
+                    .await;
+                match state.get().await {
+                    Ok(app_state) => {
+                        eprintln!("[startup] starting Codex provider refresh");
+                        let result =
+                            commands::refresh_provider_data(&app_state, domain::ProviderId::Codex)
+                                .await;
+                        if let Some(codex) = result.data {
+                            tray::update_codex_menu_item(&app_handle, &codex);
+                            eprintln!("[startup] Codex provider refresh completed");
+                        } else if let Some(error) = result.error {
+                            tray::update_codex_menu_item(
+                                &app_handle,
+                                &commands::ProviderState {
+                                    provider: domain::ProviderId::Codex,
+                                    status: domain::ProviderStateKind::Error,
+                                    usage: None,
+                                    last_error: Some(error),
+                                    is_refreshing: false,
+                                },
+                            );
+                            eprintln!("[startup] Codex provider refresh failed");
+                        }
+                    }
+                    Err(error) => {
+                        tray::update_codex_menu_item(
+                            &app_handle,
+                            &commands::ProviderState {
+                                provider: domain::ProviderId::Codex,
+                                status: domain::ProviderStateKind::Error,
+                                usage: None,
+                                last_error: Some(error),
+                                is_refreshing: false,
+                            },
+                        );
+                        eprintln!("[startup] backend initialization failed; Codex refresh skipped");
+                    }
+                }
+            });
 
             Ok(())
         })

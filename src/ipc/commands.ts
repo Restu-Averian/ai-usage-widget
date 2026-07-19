@@ -5,6 +5,7 @@ import {
   appSettingsSchema,
   commandResultSchema,
   historyPointSchema,
+  loginLaunchResultSchema,
   providerIdSchema,
   providerMetadataSchema,
   providerStateSchema,
@@ -13,6 +14,7 @@ import {
   AppBootstrap,
   AppSettings,
   HistoryPoint,
+  LoginLaunchResult,
   ProviderId,
   ProviderMetadata,
   ProviderState,
@@ -63,6 +65,14 @@ export function refreshProvider(
 ): Promise<ProviderState> {
   return invokeResult("refresh_provider", providerStateSchema, {
     request: { provider, scenario },
+  });
+}
+
+export function startProviderLogin(
+  provider: ProviderId,
+): Promise<LoginLaunchResult> {
+  return invokeResult("start_provider_login", loginLaunchResultSchema, {
+    request: { provider },
   });
 }
 

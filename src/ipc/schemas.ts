@@ -140,6 +140,11 @@ export const providerMetadataSchema = z.object({
   capabilities: providerCapabilitiesSchema,
 });
 
+export const loginLaunchResultSchema = z.object({
+  launched: z.boolean(),
+  message: z.string().optional().nullable(),
+});
+
 export const appSettingsSchema = z.object({
   launchAtLogin: z.boolean(),
   startMinimized: z.boolean(),

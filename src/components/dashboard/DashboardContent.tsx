@@ -1,41 +1,106 @@
 import { useUiStore } from "../../stores/uiStore";
 import { useProviderUsage } from "../../stores/queries";
+import { startProviderLogin } from "../../ipc/commands";
 import { UsageHero } from "./UsageHero";
 import { QuotaCard } from "./QuotaCard";
 import { HistoryChart } from "./HistoryChart";
 import { AlertCircle } from "lucide-react";
+import { useState } from "react";
 import "./DashboardContent.css";
 
 export function DashboardContent() {
   const { selectedProvider, mockScenarios } = useUiStore();
+  const [loginMessage, setLoginMessage] = useState<string | null>(null);
   const scenario = mockScenarios[selectedProvider];
-  const { data, isLoading, isError, isFetching } = useProviderUsage(
-    selectedProvider,
-    scenario,
-  );
+  const {
+    data: state,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useProviderUsage(selectedProvider, scenario);
+  const data = state?.usage ?? null;
+  const status = state?.status;
 
-  if (scenario === "authentication-expired" || scenario === "auth-expired") {
+  if (
+    status === "authentication-required" ||
+    scenario === "authentication-expired" ||
+    scenario === "auth-expired"
+  ) {
     return (
       <div className="dashboard-content centered state-panel auth-state">
         <AlertCircle size={32} className="warning-icon" />
-        <span className="text-heading-md">Authentication expired</span>
+        <span className="text-heading-md">Sign in required</span>
         <span className="text-body-sm text-secondary">
-          {selectedProvider} needs to reconnect.
+          Run the official Codex login flow, then refresh this provider.
         </span>
-        <button className="primary-button">Reconnect</button>
+        {loginMessage && (
+          <span className="text-caption text-secondary">{loginMessage}</span>
+        )}
+        <button
+          className="primary-button"
+          onClick={() => {
+            if (selectedProvider !== "codex") {
+              void refetch();
+              return;
+            }
+            void startProviderLogin(selectedProvider)
+              .then((result) => setLoginMessage(result.message ?? null))
+              .catch((error: unknown) =>
+                setLoginMessage(
+                  error instanceof Error ? error.message : "Login failed.",
+                ),
+              );
+          }}
+        >
+          Sign in
+        </button>
       </div>
     );
   }
 
-  if (isError || scenario === "retryable-error") {
+  if (status === "not-installed") {
+    return (
+      <div className="dashboard-content centered state-panel error-state">
+        <AlertCircle size={32} className="error-icon" />
+        <span className="text-heading-md">Codex CLI unavailable</span>
+        <span className="text-body-sm text-secondary">
+          Install the official Codex CLI, then refresh.
+        </span>
+        <button className="primary-button" onClick={() => void refetch()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (status === "unsupported") {
+    return (
+      <div className="dashboard-content centered state-panel error-state">
+        <AlertCircle size={32} className="error-icon" />
+        <span className="text-heading-md">Codex CLI unsupported</span>
+        <span className="text-body-sm text-secondary">
+          This Codex CLI version is outside the supported M5 range.
+        </span>
+        <button className="primary-button" onClick={() => void refetch()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (isError || status === "error" || scenario === "retryable-error") {
     return (
       <div className="dashboard-content centered state-panel error-state">
         <AlertCircle size={32} className="error-icon" />
         <span className="text-heading-md">Retryable error</span>
         <span className="text-body-sm text-secondary">
-          The usage check failed. Cached data is not available for this state.
+          {state?.lastError?.message ??
+            "The usage check failed. Cached data is not available for this state."}
         </span>
-        <button className="primary-button">Retry</button>
+        <button className="primary-button" onClick={() => void refetch()}>
+          Retry
+        </button>
       </div>
     );
   }
@@ -57,7 +122,9 @@ export function DashboardContent() {
         <span className="text-body-sm text-secondary">
           Connect a local provider session to view usage.
         </span>
-        <button className="primary-button">Connect {selectedProvider}</button>
+        <button className="primary-button" onClick={() => void refetch()}>
+          Connect {selectedProvider}
+        </button>
       </div>
     );
   }
@@ -67,7 +134,9 @@ export function DashboardContent() {
 
   return (
     <div className="dashboard-content">
-      {(isFetching || scenario === "refreshing-with-cache") && (
+      {(isFetching ||
+        state?.isRefreshing ||
+        scenario === "refreshing-with-cache") && (
         <div className="refresh-banner">
           <AlertCircle size={16} />
           <span className="text-label-sm">Refreshing cached data…</span>

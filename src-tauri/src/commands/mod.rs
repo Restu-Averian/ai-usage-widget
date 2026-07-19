@@ -1,10 +1,11 @@
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::app_state::AppState;
+use crate::app_state::{AppState, AppStateHandle};
 use crate::domain::{
-    AppErrorPayload, AppSettings, ConnectionType, HistoryPoint, ProviderId, ProviderMetadata,
-    ProviderStateKind, ProviderUsage,
+    AppErrorPayload, AppSettings, ConnectionType, HistoryPoint, LoginLaunchResult, ProviderId,
+    ProviderMetadata, ProviderStateKind, ProviderUsage,
 };
 use crate::providers::FakeProviderScenario;
 use crate::secrets::SecretKey;
@@ -144,7 +145,16 @@ pub async fn refresh_provider_data(
 ) -> CommandResult<ProviderState> {
     match state.scheduler.refresh_provider(state, provider).await {
         Ok(provider_state) => CommandResult::ok(provider_state),
-        Err(error) => CommandResult::err(error.payload()),
+        Err(error) => {
+            let payload = error.payload();
+            CommandResult::ok(ProviderState {
+                provider,
+                status: status_from_error(&payload.code),
+                usage: None,
+                last_error: Some(payload),
+                is_refreshing: false,
+            })
+        }
     }
 }
 
@@ -171,6 +181,16 @@ pub async fn refresh_all_providers_data(state: &AppState) -> CommandResult<Vec<P
         }
     }
     CommandResult::ok(states)
+}
+
+pub async fn start_provider_login_data(
+    state: &AppState,
+    provider: ProviderId,
+) -> CommandResult<LoginLaunchResult> {
+    match state.providers.start_login(provider).await {
+        Ok(result) => CommandResult::ok(result),
+        Err(error) => CommandResult::err(error.payload()),
+    }
 }
 
 pub async fn get_settings_data(state: &AppState) -> CommandResult<AppSettings> {
@@ -253,93 +273,196 @@ async fn provider_state_data(
         .map_err(|error| error.payload())
 }
 
+fn status_from_error(code: &crate::domain::AppErrorCode) -> ProviderStateKind {
+    match code {
+        crate::domain::AppErrorCode::ProviderUnavailable => ProviderStateKind::NotInstalled,
+        crate::domain::AppErrorCode::AuthenticationExpired => {
+            ProviderStateKind::AuthenticationRequired
+        }
+        crate::domain::AppErrorCode::Unsupported => ProviderStateKind::Unsupported,
+        crate::domain::AppErrorCode::NetworkUnavailable => ProviderStateKind::Offline,
+        _ => ProviderStateKind::Error,
+    }
+}
+
 #[tauri::command]
 pub async fn get_app_bootstrap(
-    state: tauri::State<'_, AppState>,
+    app: tauri::AppHandle,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
 ) -> Result<CommandResult<AppBootstrap>, String> {
-    Ok(get_app_bootstrap_data(&state).await)
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
+    let result = get_app_bootstrap_data(&state).await;
+    if let Some(data) = &result.data {
+        if let Some(codex) = data
+            .provider_states
+            .iter()
+            .find(|provider| provider.provider == ProviderId::Codex)
+        {
+            crate::tray::update_codex_menu_item(&app, codex);
+        }
+    }
+    Ok(result)
 }
 
 #[tauri::command]
 pub async fn list_providers(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
 ) -> Result<CommandResult<Vec<ProviderMetadata>>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(list_providers_data(&state).await)
 }
 
 #[tauri::command]
 pub async fn get_provider_state(
-    state: tauri::State<'_, AppState>,
+    app: tauri::AppHandle,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     request: ProviderRequest,
 ) -> Result<CommandResult<ProviderState>, String> {
-    Ok(get_provider_state_data(&state, request.provider).await)
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
+    let result = get_provider_state_data(&state, request.provider).await;
+    if request.provider == ProviderId::Codex {
+        if let Some(data) = &result.data {
+            crate::tray::update_codex_menu_item(&app, data);
+        }
+    }
+    Ok(result)
 }
 
 #[tauri::command]
 pub async fn refresh_provider(
-    state: tauri::State<'_, AppState>,
+    app: tauri::AppHandle,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     request: ProviderRequest,
 ) -> Result<CommandResult<ProviderState>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     if let Some(scenario) = request.scenario {
         let _ = state
             .providers
             .set_fake_scenario(request.provider, scenario)
             .await;
     }
-    Ok(refresh_provider_data(&state, request.provider).await)
+    let result = refresh_provider_data(&state, request.provider).await;
+    if request.provider == ProviderId::Codex {
+        if let Some(data) = &result.data {
+            crate::tray::update_codex_menu_item(&app, data);
+        }
+    }
+    Ok(result)
 }
 
 #[tauri::command]
 pub async fn refresh_all_providers(
-    state: tauri::State<'_, AppState>,
+    app: tauri::AppHandle,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
 ) -> Result<CommandResult<Vec<ProviderState>>, String> {
-    Ok(refresh_all_providers_data(&state).await)
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
+    let result = refresh_all_providers_data(&state).await;
+    if let Some(states) = &result.data {
+        if let Some(codex) = states
+            .iter()
+            .find(|provider| provider.provider == ProviderId::Codex)
+        {
+            crate::tray::update_codex_menu_item(&app, codex);
+        }
+    }
+    Ok(result)
+}
+
+#[tauri::command]
+pub async fn start_provider_login(
+    state: tauri::State<'_, Arc<AppStateHandle>>,
+    request: ProviderRequest,
+) -> Result<CommandResult<LoginLaunchResult>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
+    Ok(start_provider_login_data(&state, request.provider).await)
 }
 
 #[tauri::command]
 pub async fn get_settings(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
 ) -> Result<CommandResult<AppSettings>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(get_settings_data(&state).await)
 }
 
 #[tauri::command]
 pub async fn update_settings(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     settings: AppSettings,
 ) -> Result<CommandResult<AppSettings>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(update_settings_data(&state, settings).await)
 }
 
 #[tauri::command]
 pub async fn get_usage_history(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     request: HistoryRequest,
 ) -> Result<CommandResult<Vec<HistoryPoint>>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(get_usage_history_data(&state, request).await)
 }
 
 #[tauri::command]
 pub async fn save_provider_api_key(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     request: SaveProviderSecretRequest,
 ) -> Result<CommandResult<SecretMutationResult>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(save_provider_secret_data(&state, request).await)
 }
 
 #[tauri::command]
 pub async fn delete_provider_api_key(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     request: DeleteProviderSecretRequest,
 ) -> Result<CommandResult<SecretMutationResult>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(delete_provider_secret_data(&state, request).await)
 }
 
 #[tauri::command]
 pub async fn set_fake_provider_scenario(
-    state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, Arc<AppStateHandle>>,
     request: FakeScenarioRequest,
 ) -> Result<CommandResult<ProviderState>, String> {
+    let state = match state.get().await {
+        Ok(state) => state,
+        Err(error) => return Ok(CommandResult::err(error)),
+    };
     Ok(set_fake_provider_scenario_data(&state, request).await)
 }
 
@@ -398,5 +521,23 @@ mod tests {
                 .used_percent,
             None
         );
+    }
+
+    #[tokio::test]
+    async fn refresh_error_returns_typed_provider_state() {
+        let state = crate::app_state::AppState::test_with_registry(
+            crate::providers::ProviderRegistry::fake_with_scenario(
+                crate::providers::FakeProviderScenario::RetryableError,
+            ),
+        )
+        .await
+        .expect("state");
+
+        let result = refresh_provider_data(&state, ProviderId::Codex).await;
+        let provider_state = result.data.expect("provider state");
+
+        assert!(result.ok);
+        assert_eq!(provider_state.status, ProviderStateKind::Error);
+        assert!(provider_state.last_error.is_some());
     }
 }
