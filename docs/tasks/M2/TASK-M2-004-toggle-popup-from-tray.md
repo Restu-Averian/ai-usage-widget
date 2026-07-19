@@ -1,7 +1,7 @@
 # TASK-M2-004 — Toggle Popup from Tray
 
 **Milestone:** [M2 — Desktop Shell](../../milestones/M2-desktop-shell.md)  
-**Status:** BACKLOG  
+**Status:** DONE  
 **Priority:** P2  
 **Last updated:** 2026-07-16
 

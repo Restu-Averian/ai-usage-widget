@@ -1,0 +1,40 @@
+[package]
+name = "ai-usage-dock"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "ai_usage_dock_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+chrono = { version = "0.4.45", features = ["serde"] }
+thiserror = "2.0.18"
+uuid = { version = "1.24.0", features = ["serde", "v4"] }
+tokio = { version = "1.53.0", features = ["macros", "rt-multi-thread", "time", "process", "sync"] }
+async-trait = "0.1.89"
+reqwest = { version = "0.13.4", default-features = false, features = ["rustls", "json"] }
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "sqlite", "chrono", "uuid", "json"] }
+secrecy = "0.10.3"
+keyring = { version = "4.1.5", default-features = false, features = ["v1"] }
+
+[dev-dependencies]
+tempfile = "3.27.0"
+

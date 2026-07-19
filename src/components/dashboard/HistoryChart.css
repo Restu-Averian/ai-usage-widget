@@ -1,0 +1,15 @@
+.history-chart-container {
+  padding: 0 var(--space-4);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.history-chart-header {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.chart-wrapper {
+  height: 80px;
+  width: 100%;
+}

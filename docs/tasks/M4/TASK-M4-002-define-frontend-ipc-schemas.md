@@ -1,7 +1,7 @@
 # TASK-M4-002 — Define Frontend IPC Schemas
 
 **Milestone:** [M4 — Core Application Layer](../../milestones/M4-core-application-layer.md)  
-**Status:** BACKLOG  
+**Status:** DONE
 **Priority:** P2  
 **Last updated:** 2026-07-16
 
