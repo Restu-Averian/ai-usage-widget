@@ -10,19 +10,14 @@ pub mod scheduler;
 pub mod secrets;
 pub mod tray;
 
-use tauri::{
-    menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
-    tray::TrayIconBuilder,
-    Manager,
-};
+use tauri::Manager;
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
-use tauri_plugin_positioner::{Position, WindowExt};
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 struct AutoHideGuard(AtomicBool);
-struct ToggleMenuItem(tauri::menu::MenuItem<tauri::Wry>);
+pub(crate) struct ToggleMenuItem(tauri::menu::MenuItem<tauri::Wry>);
 
 #[tauri::command]
 fn set_auto_hide_guard(state: tauri::State<'_, AutoHideGuard>, value: bool) {
@@ -39,7 +34,7 @@ fn hide_window(window: tauri::WebviewWindow) {
 
 #[tauri::command]
 fn set_tray_title(app: tauri::AppHandle, title: Option<String>) {
-    if let Some(tray) = app.tray_by_id("main") {
+    if let Some(tray) = app.tray_by_id(tray::MAIN_TRAY_ID) {
         let _ = tray.set_title(title.as_deref());
     }
 }
@@ -58,7 +53,7 @@ fn set_autostart_state(app: tauri::AppHandle, enable: bool) -> Result<(), String
     }
 }
 
-fn shutdown_backend(app: &tauri::AppHandle) {
+pub(crate) fn shutdown_backend(app: &tauri::AppHandle) {
     if let Some(state) = app.try_state::<Arc<app_state::AppStateHandle>>() {
         tauri::async_runtime::block_on(async {
             if let Some(app_state) = state.state_if_ready() {
@@ -107,126 +102,22 @@ pub fn run() {
             commands::set_fake_provider_scenario
         ])
         .setup(|app| {
+            eprintln!("[startup] Tauri setup started");
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
+            tray::create_main_tray(app)?;
 
             let state = Arc::new(app_state::AppStateHandle::new());
             app.manage(state.clone());
 
-            let toggle_i =
-                MenuItem::with_id(app, "toggle", "Open AI Usage Dock", true, None::<&str>)?;
-            app.manage(ToggleMenuItem(toggle_i.clone()));
-            let refresh_i = MenuItem::with_id(app, "refresh", "Refresh All", true, None::<&str>)?;
-
-            let codex_i = MenuItem::with_id(
-                app,
-                "codex",
-                crate::tray::codex_loading_tray_label(),
-                false,
-                None::<&str>,
-            )?;
-            app.manage(crate::tray::CodexTrayMenuItem(codex_i.clone()));
-            let ag_i = MenuItem::with_id(
-                app,
-                "antigravity",
-                "Antigravity — Not connected",
-                false,
-                None::<&str>,
-            )?;
-
-            let settings_i = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
-            let launch_i = CheckMenuItem::with_id(
-                app,
-                "launch_at_login",
-                "Launch at Login",
-                true,
-                false,
-                None::<&str>,
-            )?;
-            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-
-            let separator = PredefinedMenuItem::separator(app)?;
-
-            let menu = Menu::with_items(
-                app,
-                &[
-                    &toggle_i,
-                    &refresh_i,
-                    &separator,
-                    &codex_i,
-                    &ag_i,
-                    &separator,
-                    &settings_i,
-                    &launch_i,
-                    &quit_i,
-                ],
-            )?;
-
-            let toggle_i_clone = toggle_i.clone();
-            let toggle_i_tray = toggle_i.clone();
-
-            let icon = app
-                .default_window_icon()
-                .cloned()
-                .ok_or(tauri::Error::UnknownPath)?;
-
-            let tray_icon = TrayIconBuilder::with_id("main")
-                .tooltip("AI Usage Dock")
-                .icon(icon)
-                .icon_as_template(true)
-                .menu(&menu)
-                .show_menu_on_left_click(false)
-                .on_menu_event(move |app, event| {
-                    if event.id.as_ref() == "quit" {
-                        shutdown_backend(app);
-                        app.exit(0);
-                    } else if event.id.as_ref() == "toggle" {
-                        if let Some(window) = app.get_webview_window("usage-popup") {
-                            let is_visible = window.is_visible().unwrap_or(false);
-                            if is_visible {
-                                let _ = window.hide();
-                                let _ = toggle_i_clone.set_text("Open AI Usage Dock");
-                            } else {
-                                let _ = window.move_window(Position::TrayCenter);
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                                let _ = toggle_i_clone.set_text("Hide AI Usage Dock");
-                            }
-                        }
-                    }
-                })
-                .on_tray_icon_event(move |tray, event| {
-                    tauri_plugin_positioner::on_tray_event(tray.app_handle(), &event);
-                    if let tauri::tray::TrayIconEvent::Click {
-                        button: tauri::tray::MouseButton::Left,
-                        button_state: tauri::tray::MouseButtonState::Up,
-                        ..
-                    } = event
-                    {
-                        let app = tray.app_handle();
-                        if let Some(window) = app.get_webview_window("usage-popup") {
-                            let is_visible = window.is_visible().unwrap_or(false);
-                            if is_visible {
-                                let _ = window.hide();
-                                let _ = toggle_i_tray.set_text("Open AI Usage Dock");
-                            } else {
-                                let _ = window.move_window(Position::TrayCenter);
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                                let _ = toggle_i_tray.set_text("Hide AI Usage Dock");
-                            }
-                        }
-                    }
-                })
-                .build(app)?;
-            app.manage(crate::tray::MainTrayIcon(tray_icon));
-
             let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                eprintln!("[startup] desktop shell ready; starting backend initialization");
+                eprintln!("[startup] Starting background initialization");
                 let database_path = match app_handle.path().app_data_dir() {
                     Ok(path) => path.join("ai-usage-dock.sqlite3"),
                     Err(_) => {
+                        eprintln!("[startup] Database initialization failed: app data directory unavailable");
                         state.initialize_failed(domain::AppError::Database.payload());
                         return;
                     }
