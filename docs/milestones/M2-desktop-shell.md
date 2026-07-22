@@ -1,6 +1,6 @@
 # M2 — Desktop Shell
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** PASS — regression remediation assigned to M5  
 **Last updated:** 2026-07-19
 

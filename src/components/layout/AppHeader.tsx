@@ -28,7 +28,7 @@ export function AppHeader() {
       <div className="header-logo-container">
         {/* Placeholder for app icon */}
         <div className="app-icon-placeholder" />
-        <span className="text-heading-md header-title">AI Usage Dock</span>
+        <span className="text-heading-md header-title">AI Usage Widget</span>
       </div>
       <div className="header-actions">
         <button

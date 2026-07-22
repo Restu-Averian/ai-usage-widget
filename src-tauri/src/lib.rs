@@ -28,7 +28,7 @@ fn set_auto_hide_guard(state: tauri::State<'_, AutoHideGuard>, value: bool) {
 fn hide_window(window: tauri::WebviewWindow) {
     let _ = window.hide();
     if let Some(item) = window.app_handle().try_state::<ToggleMenuItem>() {
-        let _ = item.0.set_text("Open AI Usage Dock");
+        let _ = item.0.set_text("Open AI Usage Widget");
     }
 }
 
@@ -77,7 +77,7 @@ pub fn run() {
                 let _ = window.show();
                 let _ = window.set_focus();
                 if let Some(item) = app.try_state::<ToggleMenuItem>() {
-                    let _ = item.0.set_text("Hide AI Usage Dock");
+                    let _ = item.0.set_text("Hide AI Usage Widget");
                 }
             }
         }))
@@ -176,7 +176,7 @@ pub fn run() {
                 if !state.0.load(Ordering::SeqCst) {
                     let _ = window.hide();
                     if let Some(item) = window.app_handle().try_state::<ToggleMenuItem>() {
-                        let _ = item.0.set_text("Open AI Usage Dock");
+                        let _ = item.0.set_text("Open AI Usage Widget");
                     }
                 }
             }

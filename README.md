@@ -1,6 +1,6 @@
-# AI Usage Dock
+# AI Usage Widget
 
-**AI Usage Dock** is a local-first, cross-platform desktop application designed to monitor your AI provider usage and API quota directly from your macOS Menu Bar or Windows System Tray.
+**AI Usage Widget** is a local-first, cross-platform desktop application designed to monitor your AI provider usage and API quota directly from your macOS Menu Bar or Windows System Tray.
 
 ## Project Status
 

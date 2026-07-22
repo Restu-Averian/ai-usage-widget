@@ -1,4 +1,4 @@
-# Technical Design — AI Usage Dock
+# Technical Design — AI Usage Widget
 
 **Document status:** Active design baseline  
 **Last updated:** 2026-07-19
@@ -109,14 +109,14 @@ Required behavior:
 ### Provider identity
 
 ```ts
-type ProviderId = 'codex' | 'antigravity';
+type ProviderId = "codex" | "antigravity";
 ```
 
 ### Source snapshot
 
 ```ts
 type ProviderUsageWindow = {
-  period: 'daily' | 'weekly' | 'monthly' | 'other';
+  period: "daily" | "weekly" | "monthly" | "other";
   usedPercent: number | null;
   resetsAt: string | null;
 };
@@ -125,13 +125,13 @@ type ProviderSnapshot = {
   providerId: ProviderId;
   plan: string | null;
   connectionStatus:
-    | 'not-connected'
-    | 'connecting'
-    | 'connected'
-    | 'authentication-required'
-    | 'authentication-expired'
-    | 'unavailable'
-    | 'error';
+    | "not-connected"
+    | "connecting"
+    | "connected"
+    | "authentication-required"
+    | "authentication-expired"
+    | "unavailable"
+    | "error";
   windows: ProviderUsageWindow[];
   fetchedAt: string | null;
   source: string;

@@ -1,4 +1,4 @@
-# AI Usage Dock — UI Specification
+# AI Usage Widget — UI Specification
 
 **Status:** Active fixed-dark specification  
 **Last updated:** 2026-07-19

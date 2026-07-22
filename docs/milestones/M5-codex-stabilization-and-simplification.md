@@ -1,6 +1,6 @@
 # M5 — Codex Stabilization and Simplification
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** IN PROGRESS  
 **Last updated:** 2026-07-19
 

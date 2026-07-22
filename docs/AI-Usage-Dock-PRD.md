@@ -1,11 +1,11 @@
-# PRD — AI Usage Dock
+# PRD — AI Usage Widget
 
 **Document status:** Approved product scope  
 **Last updated:** 2026-07-19
 
 ## 1. Product Overview
 
-AI Usage Dock is a local-first desktop utility that shows remaining AI subscription quota from the macOS Menu Bar or Windows System Tray.
+AI Usage Widget is a local-first desktop utility that shows remaining AI subscription quota from the macOS Menu Bar or Windows System Tray.
 
 The product is intentionally small. It answers four questions quickly:
 
@@ -96,7 +96,7 @@ Codex — 55% remaining
 Antigravity — Not connected
 ──────────────────────────
 Refresh
-Open AI Usage Dock
+Open AI Usage Widget
 Quit
 ```
 
@@ -138,15 +138,14 @@ Reset unavailable
 Provider-source values may use consumed quota:
 
 ```ts
-usedPercent: number | null
+usedPercent: number | null;
 ```
 
 Presentation derives:
 
 ```ts
-remainingPercent = usedPercent == null
-  ? null
-  : clamp(100 - usedPercent, 0, 100)
+remainingPercent =
+  usedPercent == null ? null : clamp(100 - usedPercent, 0, 100);
 ```
 
 Rules:

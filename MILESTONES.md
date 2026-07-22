@@ -1,4 +1,4 @@
-# AI Usage Dock — Milestones
+# AI Usage Widget — Milestones
 
 The canonical roadmap is located at:
 

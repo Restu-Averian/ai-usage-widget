@@ -1,6 +1,6 @@
 # M7 — Release Hardening
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** BACKLOG  
 **Last updated:** 2026-07-19
 

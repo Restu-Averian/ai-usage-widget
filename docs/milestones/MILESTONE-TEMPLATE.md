@@ -1,6 +1,6 @@
 # Mx — Milestone Name
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** BACKLOG  
 **Last updated:** YYYY-MM-DD
 

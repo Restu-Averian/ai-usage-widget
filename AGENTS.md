@@ -1,4 +1,4 @@
-# AGENTS.md — AI Usage Dock
+# AGENTS.md — AI Usage Widget
 
 This file defines mandatory instructions for every coding agent working in this repository.
 
@@ -6,7 +6,7 @@ This file defines mandatory instructions for every coding agent working in this 
 
 ## 1. Product Scope
 
-AI Usage Dock is a local-first desktop application for checking remaining AI subscription quota from the system tray.
+AI Usage Widget is a local-first desktop application for checking remaining AI subscription quota from the system tray.
 
 Active providers:
 
@@ -148,9 +148,8 @@ Never:
 Provider DTOs may preserve `usedPercent` when that is the source value. User-facing surfaces must show remaining quota:
 
 ```ts
-remainingPercent = usedPercent == null
-  ? null
-  : clamp(100 - usedPercent, 0, 100)
+remainingPercent =
+  usedPercent == null ? null : clamp(100 - usedPercent, 0, 100);
 ```
 
 Clamping occurs only at the display boundary. Unknown remains `null` and renders as `—`.

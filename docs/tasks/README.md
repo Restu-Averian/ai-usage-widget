@@ -1,4 +1,4 @@
-# AI Usage Dock — Small Tasks
+# AI Usage Widget — Small Tasks
 
 **Last updated:** 2026-07-19
 

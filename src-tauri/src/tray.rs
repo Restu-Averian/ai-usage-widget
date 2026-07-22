@@ -48,7 +48,7 @@ pub fn create_main_tray(app: &mut tauri::App) -> tauri::Result<()> {
         error
     })?;
 
-    let toggle_i = MenuItem::with_id(app, "toggle", "Open AI Usage Dock", true, None::<&str>)?;
+    let toggle_i = MenuItem::with_id(app, "toggle", "Open AI Usage Widget", true, None::<&str>)?;
     app.manage(crate::ToggleMenuItem(toggle_i.clone()));
     let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&toggle_i, &quit_i])?;
@@ -60,7 +60,7 @@ pub fn create_main_tray(app: &mut tauri::App) -> tauri::Result<()> {
     let tray_icon = TrayIconBuilder::with_id(MAIN_TRAY_ID)
         .icon(tray_icon)
         .icon_as_template(true)
-        .tooltip("AI Usage Dock")
+        .tooltip("AI Usage Widget")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(move |app, event| match event.id.as_ref() {
@@ -98,12 +98,12 @@ fn toggle_popup(app: &tauri::AppHandle, toggle_item: &MenuItem<tauri::Wry>) {
         let is_visible = window.is_visible().unwrap_or(false);
         if is_visible {
             let _ = window.hide();
-            let _ = toggle_item.set_text("Open AI Usage Dock");
+            let _ = toggle_item.set_text("Open AI Usage Widget");
         } else {
             let _ = window.move_window(Position::TrayCenter);
             let _ = window.show();
             let _ = window.set_focus();
-            let _ = toggle_item.set_text("Hide AI Usage Dock");
+            let _ = toggle_item.set_text("Hide AI Usage Widget");
         }
     }
 }

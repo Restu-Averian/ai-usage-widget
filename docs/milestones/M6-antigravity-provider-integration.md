@@ -1,6 +1,6 @@
 # M6 — Antigravity Provider Integration
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** LOCKED until M5 PASS  
 **Last updated:** 2026-07-19
 

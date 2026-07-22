@@ -292,7 +292,7 @@ async fn start_app_server(executable: PathBuf) -> Result<AppServerState, AppErro
     state
         .stdin
         .write_all(
-            br#"{"method":"initialize","id":1,"params":{"clientInfo":{"name":"ai_usage_dock","title":"AI Usage Dock","version":"0.1.0"},"capabilities":{"experimentalApi":true}}}"#,
+            br#"{"method":"initialize","id":1,"params":{"clientInfo":{"name":"ai_usage_dock","title":"AI Usage Widget","version":"0.1.0"},"capabilities":{"experimentalApi":true}}}"#,
         )
         .await
         .map_err(|_| AppError::ProviderUnavailable("Codex app-server unavailable.".into()))?;

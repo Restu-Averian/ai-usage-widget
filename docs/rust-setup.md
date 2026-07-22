@@ -1,4 +1,4 @@
-# Rust Setup — AI Usage Dock
+# Rust Setup — AI Usage Widget
 
 **Last updated:** 2026-07-19
 

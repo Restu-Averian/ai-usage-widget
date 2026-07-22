@@ -1,4 +1,4 @@
-# Technical Spike — AI Usage Dock
+# Technical Spike — AI Usage Widget
 
 **Document status:** Completed foundation evidence  
 **Last updated:** 2026-07-19
@@ -67,7 +67,7 @@ Provider adapters preserve the source semantic when practical:
 
 ```ts
 type ProviderWindow = {
-  period: 'weekly' | 'daily' | 'monthly' | 'other';
+  period: "weekly" | "daily" | "monthly" | "other";
   usedPercent: number | null;
   resetsAt: string | null;
 };

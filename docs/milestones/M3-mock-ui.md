@@ -1,6 +1,6 @@
 # M3 — Mock UI
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** PASS — final product scope corrected  
 **Last updated:** 2026-07-19
 

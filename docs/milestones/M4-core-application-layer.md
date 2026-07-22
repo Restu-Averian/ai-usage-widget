@@ -1,6 +1,6 @@
 # M4 — Core Application Layer
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** PASS — persistence scope corrected  
 **Last updated:** 2026-07-19
 

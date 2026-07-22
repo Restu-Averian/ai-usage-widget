@@ -1,6 +1,6 @@
 # M0 — Provider Feasibility
 
-**Project:** AI Usage Dock  
+**Project:** AI Usage Widget  
 **Status:** PASS  
 **Last updated:** 2026-07-19
 

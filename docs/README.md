@@ -1,4 +1,4 @@
-# AI Usage Dock Documentation
+# AI Usage Widget Documentation
 
 **Last updated:** 2026-07-19
 
