@@ -326,6 +326,7 @@ pub async fn refresh_provider(
         Ok(state) => state,
         Err(error) => return Ok(CommandResult::err(error)),
     };
+    #[cfg(debug_assertions)]
     if let Some(scenario) = request.scenario {
         let _ = state
             .providers
@@ -426,11 +427,26 @@ pub async fn set_fake_provider_scenario(
     state: tauri::State<'_, Arc<AppStateHandle>>,
     request: FakeScenarioRequest,
 ) -> Result<CommandResult<ProviderState>, String> {
-    let state = match state.get().await {
-        Ok(state) => state,
-        Err(error) => return Ok(CommandResult::err(error)),
-    };
-    Ok(set_fake_provider_scenario_data(&state, request).await)
+    #[cfg(not(debug_assertions))]
+    {
+        let _ = state;
+        let _ = request;
+        return Ok(CommandResult::err(
+            crate::domain::AppError::InvalidInput(
+                "Development mock scenarios are disabled in production.".into(),
+            )
+            .payload(),
+        ));
+    }
+
+    #[cfg(debug_assertions)]
+    {
+        let state = match state.get().await {
+            Ok(state) => state,
+            Err(error) => return Ok(CommandResult::err(error)),
+        };
+        Ok(set_fake_provider_scenario_data(&state, request).await)
+    }
 }
 
 #[cfg(test)]

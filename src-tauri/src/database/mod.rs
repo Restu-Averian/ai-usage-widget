@@ -12,10 +12,11 @@ use crate::domain::{
     ProviderUsage, Reliability, UsagePeriod, UsageWindow,
 };
 
-const MIGRATIONS: &[Migration] = &[Migration {
-    version: 1,
-    name: "m4_core_schema",
-    sql: r#"
+const MIGRATIONS: &[Migration] = &[
+    Migration {
+        version: 1,
+        name: "m4_core_schema",
+        sql: r#"
 CREATE TABLE IF NOT EXISTS provider_connections (
     id TEXT PRIMARY KEY,
     provider TEXT NOT NULL,
@@ -71,19 +72,6 @@ CREATE TABLE IF NOT EXISTS usage_windows (
 CREATE INDEX IF NOT EXISTS idx_usage_windows_snapshot
 ON usage_windows(snapshot_id);
 
-CREATE TABLE IF NOT EXISTS api_usage_totals (
-    id TEXT PRIMARY KEY,
-    snapshot_id TEXT NOT NULL,
-    input_tokens INTEGER,
-    output_tokens INTEGER,
-    cached_tokens INTEGER,
-    request_count INTEGER,
-    cost_used REAL,
-    budget REAL,
-    currency TEXT,
-    FOREIGN KEY(snapshot_id) REFERENCES usage_snapshots(id) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS notification_states (
     id TEXT PRIMARY KEY,
     provider TEXT NOT NULL,
@@ -110,7 +98,34 @@ CREATE TABLE IF NOT EXISTS app_settings (
     updated_at TEXT NOT NULL
 );
 "#,
-}];
+    },
+    Migration {
+        version: 2,
+        name: "m5_drop_obsolete_api_usage_totals",
+        sql: "DROP TABLE IF EXISTS api_usage_totals;",
+    },
+    Migration {
+        version: 3,
+        name: "m5_prune_obsolete_provider_snapshots",
+        sql: r#"
+DELETE FROM usage_snapshots
+WHERE id NOT IN (
+    SELECT id
+    FROM (
+        SELECT
+            id,
+            ROW_NUMBER() OVER (
+                PARTITION BY provider
+                ORDER BY captured_at DESC, rowid DESC
+            ) AS row_number
+        FROM usage_snapshots
+        WHERE provider IN ('codex', 'antigravity')
+    )
+    WHERE row_number = 1
+);
+"#,
+    },
+];
 
 struct Migration {
     version: i64,
@@ -539,6 +554,94 @@ mod tests {
         let database = Database::in_memory().await.expect("database");
 
         database.run_migrations().await.expect("rerun migrations");
+    }
+
+    #[tokio::test]
+    async fn obsolete_api_usage_totals_table_is_not_retained() {
+        let database = Database::in_memory().await.expect("database");
+        let row: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'api_usage_totals'",
+        )
+        .fetch_one(database.pool())
+        .await
+        .expect("table count");
+
+        assert_eq!(row.0, 0);
+    }
+
+    #[tokio::test]
+    async fn migration_prunes_obsolete_provider_and_historical_snapshots() {
+        let options = SqliteConnectOptions::from_str("sqlite::memory:")
+            .expect("options")
+            .foreign_keys(true);
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect_with(options)
+            .await
+            .expect("pool");
+        sqlx::query(
+            r#"
+CREATE TABLE schema_migrations (
+    version INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+INSERT INTO schema_migrations (version, name) VALUES (1, 'm4_core_schema');
+CREATE TABLE usage_snapshots (
+    id TEXT PRIMARY KEY,
+    provider TEXT NOT NULL,
+    connection_type TEXT NOT NULL,
+    account_label TEXT,
+    plan_name TEXT,
+    reliability TEXT NOT NULL,
+    fetched_at TEXT NOT NULL,
+    captured_at TEXT NOT NULL,
+    stale INTEGER NOT NULL DEFAULT 0,
+    warning_json TEXT NOT NULL DEFAULT '[]'
+);
+CREATE TABLE usage_windows (
+    id TEXT PRIMARY KEY,
+    snapshot_id TEXT NOT NULL,
+    external_window_id TEXT NOT NULL,
+    label TEXT NOT NULL,
+    period TEXT NOT NULL,
+    model TEXT,
+    used_percent REAL,
+    remaining_percent REAL,
+    reset_at TEXT,
+    derived_used_percent INTEGER NOT NULL DEFAULT 0,
+    derived_remaining_percent INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY(snapshot_id) REFERENCES usage_snapshots(id) ON DELETE CASCADE
+);
+CREATE TABLE api_usage_totals (id TEXT PRIMARY KEY);
+INSERT INTO usage_snapshots (id, provider, connection_type, reliability, fetched_at, captured_at)
+VALUES
+    ('codex-old', 'codex', 'subscription-cli', 'official-cli-json', '2026-07-18T00:00:00Z', '2026-07-18T00:00:00Z'),
+    ('codex-new', 'codex', 'subscription-cli', 'official-cli-json', '2026-07-19T00:00:00Z', '2026-07-19T00:00:00Z'),
+    ('claude-old', 'claude', 'subscription-cli', 'official-cli-json', '2026-07-18T00:00:00Z', '2026-07-18T00:00:00Z');
+"#,
+        )
+        .execute(&pool)
+        .await
+        .expect("seed old database");
+        let database = Database { pool };
+
+        database.run_migrations().await.expect("migrate");
+        let providers = sqlx::query_as::<_, (String,)>(
+            "SELECT provider FROM usage_snapshots ORDER BY provider",
+        )
+        .fetch_all(database.pool())
+        .await
+        .expect("providers");
+        let obsolete_table: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'api_usage_totals'",
+        )
+        .fetch_one(database.pool())
+        .await
+        .expect("obsolete table");
+
+        assert_eq!(providers, vec![("codex".to_string(),)]);
+        assert_eq!(obsolete_table.0, 0);
     }
 
     #[tokio::test]

@@ -1,7 +1,7 @@
 use crate::commands::ProviderState;
-use crate::domain::{AppErrorCode, ProviderStateKind};
+use crate::domain::{AppErrorCode, ProviderId, ProviderStateKind};
 use tauri::{
-    menu::{Menu, MenuItem},
+    menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::TrayIconBuilder,
     Manager,
 };
@@ -48,10 +48,23 @@ pub fn create_main_tray(app: &mut tauri::App) -> tauri::Result<()> {
         error
     })?;
 
+    let codex_i = MenuItem::with_id(
+        app,
+        "codex",
+        codex_loading_tray_label(),
+        false,
+        None::<&str>,
+    )?;
+    app.manage(CodexTrayMenuItem(codex_i.clone()));
+    let refresh_i = MenuItem::with_id(app, "refresh", "Refresh", true, None::<&str>)?;
+    let separator_i = PredefinedMenuItem::separator(app)?;
     let toggle_i = MenuItem::with_id(app, "toggle", "Open AI Usage Widget", true, None::<&str>)?;
     app.manage(crate::ToggleMenuItem(toggle_i.clone()));
     let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&toggle_i, &quit_i])?;
+    let menu = Menu::with_items(
+        app,
+        &[&codex_i, &separator_i, &refresh_i, &toggle_i, &quit_i],
+    )?;
 
     let toggle_i_menu = toggle_i.clone();
     let toggle_i_tray = toggle_i.clone();
@@ -68,6 +81,7 @@ pub fn create_main_tray(app: &mut tauri::App) -> tauri::Result<()> {
                 crate::shutdown_backend(app);
                 app.exit(0);
             }
+            "refresh" => refresh_codex(app),
             "toggle" => toggle_popup(app, &toggle_i_menu),
             _ => {}
         })
@@ -106,6 +120,38 @@ fn toggle_popup(app: &tauri::AppHandle, toggle_item: &MenuItem<tauri::Wry>) {
             let _ = toggle_item.set_text("Hide AI Usage Widget");
         }
     }
+}
+
+fn refresh_codex(app: &tauri::AppHandle) {
+    let Some(state_handle) = app
+        .try_state::<std::sync::Arc<crate::app_state::AppStateHandle>>()
+        .map(|state| state.inner().clone())
+    else {
+        return;
+    };
+    let app_handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let state = match state_handle.get().await {
+            Ok(state) => state,
+            Err(error) => {
+                update_codex_menu_item(
+                    &app_handle,
+                    &ProviderState {
+                        provider: ProviderId::Codex,
+                        status: ProviderStateKind::Error,
+                        usage: None,
+                        last_error: Some(error),
+                        is_refreshing: false,
+                    },
+                );
+                return;
+            }
+        };
+        let result = crate::commands::refresh_provider_data(&state, ProviderId::Codex).await;
+        if let Some(codex) = result.data {
+            update_codex_menu_item(&app_handle, &codex);
+        }
+    });
 }
 
 pub fn codex_loading_tray_label() -> String {
